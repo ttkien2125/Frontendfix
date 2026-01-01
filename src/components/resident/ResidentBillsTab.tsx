@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Badge } from "../ui/badge";
+import { CheckCircle, Clock, XCircle, FileText } from "lucide-react";
 import { api, Bill } from "../../services/api";
 import { LoadingSpinner } from "../shared/LoadingSpinner";
 
@@ -27,11 +28,26 @@ export function ResidentBillsTab() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "Paid":
-        return <Badge className="bg-green-500">Đã thanh toán</Badge>;
+        return (
+          <Badge className="bg-green-500 flex items-center gap-1">
+            <CheckCircle className="w-3 h-3" />
+            Đã thanh toán
+          </Badge>
+        );
       case "Unpaid":
-        return <Badge className="bg-yellow-500">Chưa thanh toán</Badge>;
+        return (
+          <Badge className="bg-yellow-500 flex items-center gap-1">
+            <Clock className="w-3 h-3" />
+            Chưa thanh toán
+          </Badge>
+        );
       case "Overdue":
-        return <Badge className="bg-red-500">Quá hạn</Badge>;
+        return (
+          <Badge className="bg-red-500 flex items-center gap-1">
+            <XCircle className="w-3 h-3" />
+            Quá hạn
+          </Badge>
+        );
       default:
         return <Badge>{status}</Badge>;
     }
@@ -48,7 +64,10 @@ export function ResidentBillsTab() {
       </CardHeader>
       <CardContent>
         {bills.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">Không có hóa đơn nào</p>
+          <div className="flex flex-col items-center justify-center py-12">
+            <FileText className="w-16 h-16 text-gray-300 mb-4" />
+            <p className="text-gray-500 text-center">Không có hóa đơn nào</p>
+          </div>
         ) : (
           <Table>
             <TableHeader>

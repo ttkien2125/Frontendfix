@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
-import { ShieldAlert } from "lucide-react";
+import { ShieldAlert, ClipboardList } from "lucide-react";
 import { api, BuildingManager } from "../../services/api";
 import { LoadingSpinner } from "../shared/LoadingSpinner";
 import { Permissions, UserRole } from "../../utils/permissions";
@@ -58,7 +58,10 @@ export function BuildingManagersTab({ role }: BuildingManagersTabProps) {
       </CardHeader>
       <CardContent>
         {managers.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">Không có quản lý tòa nhà nào</p>
+          <div className="flex flex-col items-center justify-center py-12">
+            <ClipboardList className="w-16 h-16 text-gray-300 mb-4" />
+            <p className="text-gray-500 text-center">Không có quản lý tòa nhà nào</p>
+          </div>
         ) : (
           <Table>
             <TableHeader>

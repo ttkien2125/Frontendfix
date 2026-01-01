@@ -5,6 +5,7 @@ import { ShieldAlert } from "lucide-react";
 import { api, Resident } from "../../services/api";
 import { LoadingSpinner } from "../shared/LoadingSpinner";
 import { Permissions, UserRole } from "../../utils/permissions";
+import { Users } from "lucide-react";
 
 interface ResidentManagementTabProps {
   role: string;
@@ -58,7 +59,10 @@ export function ResidentManagementTab({ role }: ResidentManagementTabProps) {
       </CardHeader>
       <CardContent>
         {residents.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">Không có cư dân nào</p>
+          <div className="flex flex-col items-center justify-center py-12">
+            <Users className="w-16 h-16 text-gray-300 mb-4" />
+            <p className="text-gray-500 text-center">Không có cư dân nào</p>
+          </div>
         ) : (
           <Table>
             <TableHeader>

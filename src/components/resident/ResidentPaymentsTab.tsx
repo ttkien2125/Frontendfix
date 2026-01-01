@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { CheckCircle, Clock, XCircle, QrCode, CreditCard } from "lucide-react";
 import { api, PaymentTransaction, Bill } from "../../services/api";
 import { LoadingSpinner } from "../shared/LoadingSpinner";
 import { toast } from "sonner";
@@ -63,11 +64,26 @@ export function ResidentPaymentsTab() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "Success":
-        return <Badge className="bg-green-500">Thành công</Badge>;
+        return (
+          <Badge className="bg-green-500 flex items-center gap-1">
+            <CheckCircle className="w-3 h-3" />
+            Thành công
+          </Badge>
+        );
       case "Pending":
-        return <Badge className="bg-yellow-500">Đang xử lý</Badge>;
+        return (
+          <Badge className="bg-yellow-500 flex items-center gap-1">
+            <Clock className="w-3 h-3" />
+            Đang xử lý
+          </Badge>
+        );
       case "Failed":
-        return <Badge className="bg-red-500">Thất bại</Badge>;
+        return (
+          <Badge className="bg-red-500 flex items-center gap-1">
+            <XCircle className="w-3 h-3" />
+            Thất bại
+          </Badge>
+        );
       default:
         return <Badge>{status}</Badge>;
     }
@@ -121,8 +137,9 @@ export function ResidentPaymentsTab() {
             <Button
               onClick={handleCreateQR}
               disabled={selectedBills.length === 0}
-              className="w-full bg-blue-600 hover:bg-blue-700"
+              className="w-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-2"
             >
+              <QrCode className="w-5 h-5" />
               Tạo mã QR thanh toán ({selectedBills.length} hóa đơn)
             </Button>
           </CardContent>
@@ -136,7 +153,10 @@ export function ResidentPaymentsTab() {
         </CardHeader>
         <CardContent>
           {payments.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">Chưa có giao dịch nào</p>
+            <div className="flex flex-col items-center justify-center py-12">
+              <CreditCard className="w-16 h-16 text-gray-300 mb-4" />
+              <p className="text-gray-500 text-center">Chưa có giao dịch nào</p>
+            </div>
           ) : (
             <Table>
               <TableHeader>

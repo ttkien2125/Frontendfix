@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
-import { ShieldAlert } from "lucide-react";
+import { ShieldAlert, Calculator } from "lucide-react";
 import { api, Accountant } from "../../services/api";
 import { LoadingSpinner } from "../shared/LoadingSpinner";
 import { Permissions, UserRole } from "../../utils/permissions";
@@ -58,7 +58,10 @@ export function AccountantsTab({ role }: AccountantsTabProps) {
       </CardHeader>
       <CardContent>
         {accountants.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">Không có kế toán nào</p>
+          <div className="flex flex-col items-center justify-center py-12">
+            <Calculator className="w-16 h-16 text-gray-300 mb-4" />
+            <p className="text-gray-500 text-center">Không có kế toán nào</p>
+          </div>
         ) : (
           <Table>
             <TableHeader>

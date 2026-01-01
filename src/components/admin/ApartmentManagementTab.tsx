@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
-import { ShieldAlert } from "lucide-react";
+import { ShieldAlert, Building } from "lucide-react";
 import { api, Apartment } from "../../services/api";
 import { LoadingSpinner } from "../shared/LoadingSpinner";
 import { Permissions, UserRole } from "../../utils/permissions";
@@ -58,7 +58,10 @@ export function ApartmentManagementTab({ role }: ApartmentManagementTabProps) {
       </CardHeader>
       <CardContent>
         {apartments.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">Không có căn hộ nào</p>
+          <div className="flex flex-col items-center justify-center py-12">
+            <Building className="w-16 h-16 text-gray-300 mb-4" />
+            <p className="text-gray-500 text-center">Không có căn hộ nào</p>
+          </div>
         ) : (
           <Table>
             <TableHeader>
