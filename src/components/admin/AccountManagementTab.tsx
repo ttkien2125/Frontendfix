@@ -1,13 +1,11 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
-import { ShieldAlert, Plus, Pencil, Trash2, Key } from "lucide-react";
-import { api, AccountCreate, AccountRoleUpdate, AccountPasswordUpdate } from "../../services/api";
+import { ShieldAlert, UserPlus, Check, Lock, User, Mail } from "lucide-react";
+import { api, AccountCreate } from "../../services/api";
 import { Permissions, UserRole } from "../../utils/permissions";
 import { toast } from "sonner@2.0.3";
 
@@ -15,274 +13,271 @@ interface AccountManagementTabProps {
   role: string;
 }
 
-type Account = {
-  username: string;
-  role: string;
-  isActive: boolean;
-};
-
 export function AccountManagementTab({ role }: AccountManagementTabProps) {
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
-
-  // Form states
+  const [loading, setLoading] = useState(false);
   const [createForm, setCreateForm] = useState<AccountCreate>({
     username: "",
     password: "",
     role: "Resident",
   });
-  const [editRole, setEditRole] = useState<UserRole>("Resident");
-  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const canAccess = Permissions.canManageAccounts(role as UserRole);
 
-  const loadAccounts = async () => {
-    // Note: Backend doesn't have a "get all accounts" endpoint
-    // This is a placeholder - you would need to add this endpoint to your backend
-    toast.info("Tính năng đang được phát triển");
-  };
-
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate password confirmation
+    if (createForm.password !== confirmPassword) {
+      toast.error("Mật khẩu xác nhận không khớp");
+      return;
+    }
+
+    // Validate password strength
+    if (createForm.password.length < 6) {
+      toast.error("Mật khẩu phải có ít nhất 6 ký tự");
+      return;
+    }
+
+    setLoading(true);
     try {
       await api.accounts.create(createForm);
-      toast.success("Tạo tài khoản thành công");
-      setCreateDialogOpen(false);
+      toast.success("Tạo tài khoản thành công!");
+      // Reset form
       setCreateForm({ username: "", password: "", role: "Resident" });
-      loadAccounts();
+      setConfirmPassword("");
     } catch (error: any) {
       toast.error(error.message || "Không thể tạo tài khoản");
-    }
-  };
-
-  const handleUpdateRole = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedAccount) return;
-
-    try {
-      await api.accounts.updateRole(selectedAccount.username, { role: editRole });
-      toast.success("Cập nhật vai trò thành công");
-      setEditDialogOpen(false);
-      loadAccounts();
-    } catch (error: any) {
-      toast.error(error.message || "Không thể cập nhật vai trò");
-    }
-  };
-
-  const handleUpdatePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedAccount) return;
-
-    try {
-      await api.accounts.updatePassword(selectedAccount.username, { newPassword });
-      toast.success("Đổi mật khẩu thành công");
-      setPasswordDialogOpen(false);
-      setNewPassword("");
-    } catch (error: any) {
-      toast.error(error.message || "Không thể đổi mật khẩu");
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!selectedAccount) return;
-
-    try {
-      await api.accounts.delete(selectedAccount.username);
-      toast.success("Xóa tài khoản thành công");
-      setDeleteDialogOpen(false);
-      loadAccounts();
-    } catch (error: any) {
-      toast.error(error.message || "Không thể xóa tài khoản");
+    } finally {
+      setLoading(false);
     }
   };
 
   if (!canAccess) {
     return (
-      <Card className="shadow-lg">
-        <CardContent className="flex flex-col items-center justify-center py-12">
-          <ShieldAlert className="w-12 h-12 text-red-500 mb-4" />
-          <h3 className="text-gray-900 mb-2">Không có quyền truy cập</h3>
-          <p className="text-gray-600 text-center">
-            Chỉ Manager và Admin mới có quyền quản lý tài khoản
-          </p>
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center min-h-[600px]">
+        <Card className="shadow-lg max-w-md">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <ShieldAlert className="w-16 h-16 text-red-500 mb-4" />
+            <h3 className="text-xl text-gray-900 mb-2">Không có quyền truy cập</h3>
+            <p className="text-gray-600 text-center">
+              Chỉ Manager và Admin mới có quyền quản lý tài khoản
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <Card className="shadow-lg border-blue-200">
-        <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg flex flex-row items-center justify-between">
-          <CardTitle className="text-white">Quản lý tài khoản</CardTitle>
-          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-white text-blue-600 hover:bg-blue-50">
-                <Plus className="w-4 h-4 mr-2" />
-                Tạo tài khoản
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>Tạo tài khoản mới</DialogTitle>
-                <DialogDescription>
-                  Nhập thông tin để tạo tài khoản mới trong hệ thống
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleCreateAccount} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="username">Tên đăng nhập</Label>
-                  <Input
-                    id="username"
-                    value={createForm.username}
-                    onChange={(e) => setCreateForm({ ...createForm, username: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Mật khẩu</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={createForm.password}
-                    onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="role">Vai trò</Label>
-                  <Select
-                    value={createForm.role}
-                    onValueChange={(value) => setCreateForm({ ...createForm, role: value as UserRole })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Resident">Cư dân</SelectItem>
-                      <SelectItem value="Accountant">Kế toán</SelectItem>
-                      <SelectItem value="Manager">Quản lý</SelectItem>
-                      <SelectItem value="Admin">Quản trị viên</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex justify-end gap-3">
-                  <Button type="button" variant="outline" onClick={() => setCreateDialogOpen(false)}>
-                    Hủy
-                  </Button>
-                  <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-                    Tạo tài khoản
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-12">
-            <p className="text-gray-600 mb-2">
-              Chức năng xem danh sách tài khoản đang được phát triển.
-            </p>
-            <p className="text-gray-500 text-sm">
-              Backend cần endpoint để lấy danh sách tất cả tài khoản.
-            </p>
-            <p className="text-gray-500 text-sm mt-2">
-              Hiện tại bạn có thể tạo tài khoản mới bằng nút "Tạo tài khoản" ở trên.
-            </p>
+    <div className="flex items-center justify-center min-h-[600px] py-8">
+      <Card className="w-full max-w-xl shadow-2xl border-blue-200">
+        {/* Header */}
+        <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg text-center pb-8">
+          <div className="flex justify-center mb-4">
+            <div className="bg-white rounded-full p-4">
+              <UserPlus className="w-12 h-12 text-blue-600" />
+            </div>
           </div>
-        </CardContent>
-      </Card>
+          <CardTitle className="text-3xl text-white mb-2">Tạo tài khoản mới</CardTitle>
+          <CardDescription className="text-blue-100">
+            Nhập thông tin để tạo tài khoản người dùng trong hệ thống BlueMoon
+          </CardDescription>
+        </CardHeader>
 
-      {/* Edit Role Dialog */}
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Chỉnh sửa vai trò</DialogTitle>
-            <DialogDescription>
-              Thay đổi vai trò của tài khoản {selectedAccount?.username}
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleUpdateRole} className="space-y-4">
+        {/* Form */}
+        <CardContent className="pt-8 pb-8 px-8">
+          <form onSubmit={handleCreateAccount} className="space-y-6">
+            {/* Username Field */}
             <div className="space-y-2">
-              <Label htmlFor="edit-role">Vai trò mới</Label>
-              <Select value={editRole} onValueChange={(value) => setEditRole(value as UserRole)}>
-                <SelectTrigger>
-                  <SelectValue />
+              <Label htmlFor="username" className="text-gray-700">
+                Tên đăng nhập <span className="text-red-500">*</span>
+              </Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="Nhập tên đăng nhập"
+                  className="pl-10 h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  value={createForm.username}
+                  onChange={(e) => setCreateForm({ ...createForm, username: e.target.value })}
+                  required
+                  minLength={3}
+                />
+              </div>
+              <p className="text-xs text-gray-500">Tên đăng nhập phải có ít nhất 3 ký tự</p>
+            </div>
+
+            {/* Role Field */}
+            <div className="space-y-2">
+              <Label htmlFor="role" className="text-gray-700">
+                Vai trò <span className="text-red-500">*</span>
+              </Label>
+              <Select
+                value={createForm.role}
+                onValueChange={(value) => setCreateForm({ ...createForm, role: value as UserRole })}
+              >
+                <SelectTrigger className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                  <SelectValue placeholder="Chọn vai trò" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Resident">Cư dân</SelectItem>
-                  <SelectItem value="Accountant">Kế toán</SelectItem>
-                  <SelectItem value="Manager">Quản lý</SelectItem>
-                  <SelectItem value="Admin">Quản trị viên</SelectItem>
+                  <SelectItem value="Resident">
+                    <div className="flex items-center gap-2">
+                      <span>👤</span>
+                      <span>Cư dân</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="Accountant">
+                    <div className="flex items-center gap-2">
+                      <span>🧮</span>
+                      <span>Kế toán</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="Manager">
+                    <div className="flex items-center gap-2">
+                      <span>📋</span>
+                      <span>Quản lý</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="Admin">
+                    <div className="flex items-center gap-2">
+                      <span>👑</span>
+                      <span>Quản trị viên</span>
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex justify-end gap-3">
-              <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
-                Hủy
-              </Button>
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-                Cập nhật
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
 
-      {/* Change Password Dialog */}
-      <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Đổi mật khẩu</DialogTitle>
-            <DialogDescription>
-              Đặt mật khẩu mới cho tài khoản {selectedAccount?.username}
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleUpdatePassword} className="space-y-4">
+            {/* Password Field */}
             <div className="space-y-2">
-              <Label htmlFor="new-password">Mật khẩu mới</Label>
-              <Input
-                id="new-password"
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                required
-              />
+              <Label htmlFor="password" className="text-gray-700">
+                Mật khẩu <span className="text-red-500">*</span>
+              </Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Nhập mật khẩu"
+                  className="pl-10 h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  value={createForm.password}
+                  onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
+                  required
+                  minLength={6}
+                />
+              </div>
+              <p className="text-xs text-gray-500">Mật khẩu phải có ít nhất 6 ký tự</p>
             </div>
-            <div className="flex justify-end gap-3">
-              <Button type="button" variant="outline" onClick={() => setPasswordDialogOpen(false)}>
-                Hủy
-              </Button>
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-                Đổi mật khẩu
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận xóa tài khoản</AlertDialogTitle>
-            <AlertDialogDescription>
-              Bạn có chắc chắn muốn xóa tài khoản "{selectedAccount?.username}" không?
-              Hành động này không thể hoàn tác.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Hủy</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
-              Xóa
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            {/* Confirm Password Field */}
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword" className="text-gray-700">
+                Xác nhận mật khẩu <span className="text-red-500">*</span>
+              </Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="Nhập lại mật khẩu"
+                  className="pl-10 h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  minLength={6}
+                />
+              </div>
+              {confirmPassword && (
+                <div className="flex items-center gap-2 text-xs">
+                  {createForm.password === confirmPassword ? (
+                    <span className="text-green-600 flex items-center gap-1">
+                      <Check className="w-3 h-3" />
+                      Mật khẩu khớp
+                    </span>
+                  ) : (
+                    <span className="text-red-600">Mật khẩu không khớp</span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
+            >
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Đang tạo tài khoản...</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <UserPlus className="w-5 h-5" />
+                  <span>Tạo tài khoản</span>
+                </div>
+              )}
+            </Button>
+          </form>
+
+          {/* Additional Info */}
+          <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <h4 className="font-semibold text-blue-900 mb-2 text-sm">📌 Lưu ý:</h4>
+            <ul className="space-y-1 text-xs text-gray-700">
+              <li className="flex items-start gap-2">
+                <span className="text-blue-600 mt-0.5">•</span>
+                <span>Tên đăng nhập phải là duy nhất trong hệ thống</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-blue-600 mt-0.5">•</span>
+                <span>Mật khẩu nên kết hợp chữ hoa, chữ thường và số để bảo mật tốt hơn</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-blue-600 mt-0.5">•</span>
+                <span>Người dùng sẽ sử dụng thông tin này để đăng nhập vào hệ thống</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Role Descriptions */}
+          <div className="mt-6 space-y-3">
+            <h4 className="font-semibold text-gray-900 text-sm">Mô tả vai trò:</h4>
+            <div className="grid grid-cols-1 gap-2">
+              <div className="flex items-start gap-2 p-3 bg-gray-50 rounded-lg">
+                <span className="text-lg">👤</span>
+                <div>
+                  <p className="font-medium text-sm text-gray-900">Cư dân</p>
+                  <p className="text-xs text-gray-600">Xem hóa đơn, thanh toán trực tuyến</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2 p-3 bg-gray-50 rounded-lg">
+                <span className="text-lg">🧮</span>
+                <div>
+                  <p className="font-medium text-sm text-gray-900">Kế toán</p>
+                  <p className="text-xs text-gray-600">Quản lý hóa đơn, thanh toán offline</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2 p-3 bg-gray-50 rounded-lg">
+                <span className="text-lg">📋</span>
+                <div>
+                  <p className="font-medium text-sm text-gray-900">Quản lý</p>
+                  <p className="text-xs text-gray-600">Quản lý cư dân, căn hộ, tòa nhà</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2 p-3 bg-gray-50 rounded-lg">
+                <span className="text-lg">👑</span>
+                <div>
+                  <p className="font-medium text-sm text-gray-900">Quản trị viên</p>
+                  <p className="text-xs text-gray-600">Toàn quyền quản lý hệ thống</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
