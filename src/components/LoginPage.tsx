@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { Button } from "./custom-ui/button";
+import { Input } from "./custom-ui/input";
+import { Label } from "./custom-ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./custom-ui/card";
 import { Building2, Lock, User, AlertCircle } from "lucide-react";
 
 interface LoginPageProps {

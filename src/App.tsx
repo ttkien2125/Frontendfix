@@ -3,7 +3,7 @@ import { LoginPage } from "./components/LoginPage";
 import { ResidentDashboard } from "./components/resident/ResidentDashboard";
 import { AdminDashboard } from "./components/admin/AdminDashboard";
 import { LoadingSpinner } from "./components/shared/LoadingSpinner";
-import { Toaster } from "./components/ui/sonner";
+import { Toaster } from "./components/custom-ui/sonner";
 
 function LoadingScreen() {
   return (
