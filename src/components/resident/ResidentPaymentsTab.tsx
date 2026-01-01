@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "../custom-ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../custom-ui/table";
+import { Badge } from "../custom-ui/badge";
+import { Button } from "../custom-ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../custom-ui/dialog";
 import { CheckCircle, Clock, XCircle, QrCode, CreditCard } from "lucide-react";
 import { api, PaymentTransaction, Bill } from "../../services/api";
 import { LoadingSpinner } from "../shared/LoadingSpinner";

@@ -1,5 +1,5 @@
-import { Home, FileText, CreditCard, Building, Users, UserCog, ClipboardList, LogOut } from "lucide-react";
-import { Button } from "../ui/button";
+import { Home, FileText, CreditCard, Building, Users, UserCog, Wallet, LogOut } from "lucide-react";
+import { Button } from "../custom-ui/button";
 import { Permissions, UserRole } from "../../utils/permissions";
 
 interface SidebarProps {
@@ -46,11 +46,11 @@ export function Sidebar({ role, activeTab, onTabChange, onLogout }: SidebarProps
     }
 
     if (Permissions.canManageBuildingManagers(userRole)) {
-      items.push({ id: "building-managers", label: "Quản lý tòa nhà", icon: ClipboardList });
+      items.push({ id: "building-managers", label: "Quản lý tòa nhà", icon: Wallet });
     }
 
     if (Permissions.canManageAccountants(userRole)) {
-      items.push({ id: "accountants", label: "Kế toán", icon: ClipboardList });
+      items.push({ id: "accountants", label: "Kế toán", icon: Wallet });
     }
 
     return items;

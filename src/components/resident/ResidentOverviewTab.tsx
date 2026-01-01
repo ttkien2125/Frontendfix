@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../custom-ui/card";
 import { FileText, CreditCard, CheckCircle, AlertCircle } from "lucide-react";
 import { api, Bill } from "../../services/api";
 import { LoadingSpinner } from "../shared/LoadingSpinner";

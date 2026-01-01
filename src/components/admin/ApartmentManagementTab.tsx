@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "../custom-ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../custom-ui/table";
 import { ShieldAlert, Building } from "lucide-react";
 import { api, Apartment } from "../../services/api";
 import { LoadingSpinner } from "../shared/LoadingSpinner";
