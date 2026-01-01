@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { ShieldAlert } from "lucide-react";
 import { api, Apartment } from "../../services/api";
 import { LoadingSpinner } from "../shared/LoadingSpinner";
+import { Permissions, UserRole } from "../../utils/permissions";
 
 interface ApartmentManagementTabProps {
   role: string;
@@ -13,7 +14,7 @@ export function ApartmentManagementTab({ role }: ApartmentManagementTabProps) {
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const canAccess = role === "Accountant" || role === "Manager" || role === "Admin";
+  const canAccess = Permissions.canViewApartments(role as UserRole);
 
   useEffect(() => {
     if (canAccess) {
@@ -34,7 +35,7 @@ export function ApartmentManagementTab({ role }: ApartmentManagementTabProps) {
 
   if (!canAccess) {
     return (
-      <Card>
+      <Card className="shadow-lg">
         <CardContent className="flex flex-col items-center justify-center py-12">
           <ShieldAlert className="w-12 h-12 text-red-500 mb-4" />
           <h3 className="text-gray-900 mb-2">Không có quyền truy cập</h3>
@@ -51,9 +52,9 @@ export function ApartmentManagementTab({ role }: ApartmentManagementTabProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Danh sách căn hộ</CardTitle>
+    <Card className="shadow-lg border-blue-200">
+      <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
+        <CardTitle className="text-white">Danh sách căn hộ</CardTitle>
       </CardHeader>
       <CardContent>
         {apartments.length === 0 ? (
@@ -61,12 +62,12 @@ export function ApartmentManagementTab({ role }: ApartmentManagementTabProps) {
         ) : (
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Mã căn hộ</TableHead>
-                <TableHead>Diện tích (m²)</TableHead>
-                <TableHead>Trạng thái</TableHead>
-                <TableHead>Mã tòa nhà</TableHead>
-                <TableHead>Số cư dân</TableHead>
+              <TableRow className="bg-blue-50">
+                <TableHead className="text-blue-900">Mã căn hộ</TableHead>
+                <TableHead className="text-blue-900">Diện tích (m²)</TableHead>
+                <TableHead className="text-blue-900">Trạng thái</TableHead>
+                <TableHead className="text-blue-900">Mã tòa nhà</TableHead>
+                <TableHead className="text-blue-900">Số cư dân</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

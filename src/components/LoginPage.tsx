@@ -32,17 +32,17 @@ export function LoginPage({ onLogin, loading }: LoginPageProps) {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-center">BlueMoon</CardTitle>
+      <Card className="w-full max-w-md shadow-xl">
+        <CardHeader className="space-y-1 text-center">
+          <CardTitle className="text-center text-blue-600">BlueMoon</CardTitle>
           <CardDescription className="text-center">
             Hệ thống quản lý tòa nhà
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="username">Tên đăng nhập</Label>
+              <Label htmlFor="username" className="text-gray-700">Tên đăng nhập</Label>
               <Input
                 id="username"
                 type="text"
@@ -50,10 +50,11 @@ export function LoginPage({ onLogin, loading }: LoginPageProps) {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 disabled={loading}
+                className="text-center"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Mật khẩu</Label>
+              <Label htmlFor="password" className="text-gray-700">Mật khẩu</Label>
               <Input
                 id="password"
                 type="password"
@@ -61,10 +62,11 @@ export function LoginPage({ onLogin, loading }: LoginPageProps) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
+                className="text-center"
               />
             </div>
             {error && (
-              <div className="text-red-500 text-sm p-2 bg-red-50 rounded">
+              <div className="text-red-500 text-sm p-2 bg-red-50 rounded text-center">
                 {error}
               </div>
             )}

@@ -77,16 +77,16 @@ export function ResidentPaymentsTab() {
     <div className="space-y-6">
       {/* Unpaid Bills Section */}
       {unpaidBills.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Hóa đơn chưa thanh toán</CardTitle>
+        <Card className="shadow-lg border-blue-200">
+          <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
+            <CardTitle className="text-white">Hóa đơn chưa thanh toán</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               {unpaidBills.map((bill) => (
                 <div
                   key={bill.billID}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                  className="flex items-center justify-between p-4 border border-blue-200 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors"
                   onClick={() => toggleBillSelection(bill.billID)}
                 >
                   <div className="flex items-center gap-3">
@@ -94,7 +94,7 @@ export function ResidentPaymentsTab() {
                       type="checkbox"
                       checked={selectedBills.includes(bill.billID)}
                       onChange={() => {}}
-                      className="w-4 h-4"
+                      className="w-4 h-4 accent-blue-600"
                     />
                     <div>
                       <p>
@@ -117,7 +117,7 @@ export function ResidentPaymentsTab() {
             <Button
               onClick={handleCreateQR}
               disabled={selectedBills.length === 0}
-              className="w-full"
+              className="w-full bg-blue-600 hover:bg-blue-700"
             >
               Tạo mã QR thanh toán ({selectedBills.length} hóa đơn)
             </Button>
@@ -126,9 +126,9 @@ export function ResidentPaymentsTab() {
       )}
 
       {/* Payment History */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Lịch sử giao dịch</CardTitle>
+      <Card className="shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
+          <CardTitle className="text-white">Lịch sử giao dịch</CardTitle>
         </CardHeader>
         <CardContent>
           {payments.length === 0 ? (
@@ -136,13 +136,13 @@ export function ResidentPaymentsTab() {
           ) : (
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Mã giao dịch</TableHead>
-                  <TableHead>Nội dung</TableHead>
-                  <TableHead>Phương thức</TableHead>
-                  <TableHead>Số tiền</TableHead>
-                  <TableHead>Ngày thanh toán</TableHead>
-                  <TableHead>Trạng thái</TableHead>
+                <TableRow className="bg-blue-50">
+                  <TableHead className="text-blue-900">Mã giao dịch</TableHead>
+                  <TableHead className="text-blue-900">Nội dung</TableHead>
+                  <TableHead className="text-blue-900">Phương thức</TableHead>
+                  <TableHead className="text-blue-900">Số tiền</TableHead>
+                  <TableHead className="text-blue-900">Ngày thanh toán</TableHead>
+                  <TableHead className="text-blue-900">Trạng thái</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

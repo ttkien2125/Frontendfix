@@ -37,19 +37,19 @@ export function ResidentOverviewTab() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm">Tổng hóa đơn</CardTitle>
-            <FileText className="w-4 h-4 text-gray-500" />
+        <Card className="border-blue-200 shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 bg-blue-50">
+            <CardTitle className="text-sm text-blue-900">Tổng hóa đơn</CardTitle>
+            <FileText className="w-4 h-4 text-blue-600" />
           </CardHeader>
           <CardContent>
             <div className="text-gray-900">{bills.length}</div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm">Chưa thanh toán</CardTitle>
+        <Card className="border-orange-200 shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 bg-orange-50">
+            <CardTitle className="text-sm text-orange-900">Chưa thanh toán</CardTitle>
             <AlertCircle className="w-4 h-4 text-orange-500" />
           </CardHeader>
           <CardContent>
@@ -57,9 +57,9 @@ export function ResidentOverviewTab() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm">Đã thanh toán</CardTitle>
+        <Card className="border-green-200 shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 bg-green-50">
+            <CardTitle className="text-sm text-green-900">Đã thanh toán</CardTitle>
             <CheckCircle className="w-4 h-4 text-green-500" />
           </CardHeader>
           <CardContent>
@@ -67,9 +67,9 @@ export function ResidentOverviewTab() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm">Tổng nợ</CardTitle>
+        <Card className="border-red-200 shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 bg-red-50">
+            <CardTitle className="text-sm text-red-900">Tổng nợ</CardTitle>
             <CreditCard className="w-4 h-4 text-red-500" />
           </CardHeader>
           <CardContent>
@@ -81,7 +81,7 @@ export function ResidentOverviewTab() {
       </div>
 
       {overdueBills > 0 && (
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border-red-200 bg-red-50 shadow-lg">
           <CardHeader>
             <CardTitle className="text-red-700">Cảnh báo quá hạn</CardTitle>
           </CardHeader>

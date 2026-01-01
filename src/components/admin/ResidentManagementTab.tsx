@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { ShieldAlert } from "lucide-react";
 import { api, Resident } from "../../services/api";
 import { LoadingSpinner } from "../shared/LoadingSpinner";
+import { Permissions, UserRole } from "../../utils/permissions";
 
 interface ResidentManagementTabProps {
   role: string;
@@ -13,7 +14,7 @@ export function ResidentManagementTab({ role }: ResidentManagementTabProps) {
   const [residents, setResidents] = useState<Resident[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const canAccess = role === "Manager" || role === "Admin";
+  const canAccess = Permissions.canManageResidents(role as UserRole);
 
   useEffect(() => {
     if (canAccess) {
@@ -34,7 +35,7 @@ export function ResidentManagementTab({ role }: ResidentManagementTabProps) {
 
   if (!canAccess) {
     return (
-      <Card>
+      <Card className="shadow-lg">
         <CardContent className="flex flex-col items-center justify-center py-12">
           <ShieldAlert className="w-12 h-12 text-red-500 mb-4" />
           <h3 className="text-gray-900 mb-2">Không có quyền truy cập</h3>
@@ -51,9 +52,9 @@ export function ResidentManagementTab({ role }: ResidentManagementTabProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Danh sách cư dân</CardTitle>
+    <Card className="shadow-lg border-blue-200">
+      <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
+        <CardTitle className="text-white">Danh sách cư dân</CardTitle>
       </CardHeader>
       <CardContent>
         {residents.length === 0 ? (
@@ -61,13 +62,13 @@ export function ResidentManagementTab({ role }: ResidentManagementTabProps) {
         ) : (
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Họ tên</TableHead>
-                <TableHead>Căn hộ</TableHead>
-                <TableHead>Tuổi</TableHead>
-                <TableHead>Số điện thoại</TableHead>
-                <TableHead>Chủ hộ</TableHead>
+              <TableRow className="bg-blue-50">
+                <TableHead className="text-blue-900">ID</TableHead>
+                <TableHead className="text-blue-900">Họ tên</TableHead>
+                <TableHead className="text-blue-900">Căn hộ</TableHead>
+                <TableHead className="text-blue-900">Tuổi</TableHead>
+                <TableHead className="text-blue-900">Số điện thoại</TableHead>
+                <TableHead className="text-blue-900">Chủ hộ</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

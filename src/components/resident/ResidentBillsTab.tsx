@@ -42,9 +42,9 @@ export function ResidentBillsTab() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Danh sách hóa đơn của tôi</CardTitle>
+    <Card className="shadow-lg">
+      <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
+        <CardTitle className="text-white">Danh sách hóa đơn của tôi</CardTitle>
       </CardHeader>
       <CardContent>
         {bills.length === 0 ? (
@@ -52,13 +52,13 @@ export function ResidentBillsTab() {
         ) : (
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Mã hóa đơn</TableHead>
-                <TableHead>Loại hóa đơn</TableHead>
-                <TableHead>Ngày tạo</TableHead>
-                <TableHead>Hạn thanh toán</TableHead>
-                <TableHead>Số tiền</TableHead>
-                <TableHead>Trạng thái</TableHead>
+              <TableRow className="bg-blue-50">
+                <TableHead className="text-blue-900">Mã hóa đơn</TableHead>
+                <TableHead className="text-blue-900">Loại hóa đơn</TableHead>
+                <TableHead className="text-blue-900">Ngày tạo</TableHead>
+                <TableHead className="text-blue-900">Hạn thanh toán</TableHead>
+                <TableHead className="text-blue-900">Số tiền</TableHead>
+                <TableHead className="text-blue-900">Trạng thái</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

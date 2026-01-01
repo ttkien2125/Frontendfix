@@ -1,16 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { ShieldAlert } from "lucide-react";
+import { Permissions, UserRole } from "../../utils/permissions";
 
 interface AccountManagementTabProps {
   role: string;
 }
 
 export function AccountManagementTab({ role }: AccountManagementTabProps) {
-  const canAccess = role === "Manager" || role === "Admin";
+  const canAccess = Permissions.canManageAccounts(role as UserRole);
 
   if (!canAccess) {
     return (
-      <Card>
+      <Card className="shadow-lg">
         <CardContent className="flex flex-col items-center justify-center py-12">
           <ShieldAlert className="w-12 h-12 text-red-500 mb-4" />
           <h3 className="text-gray-900 mb-2">Không có quyền truy cập</h3>
@@ -23,9 +24,9 @@ export function AccountManagementTab({ role }: AccountManagementTabProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Quản lý tài khoản</CardTitle>
+    <Card className="shadow-lg border-blue-200">
+      <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
+        <CardTitle className="text-white">Quản lý tài khoản</CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-gray-600">

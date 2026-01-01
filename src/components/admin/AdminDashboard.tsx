@@ -18,7 +18,7 @@ export function AdminDashboard({ username, role, onLogout }: AdminDashboardProps
   const [activeTab, setActiveTab] = useState("dashboard");
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       <Sidebar
         role={role}
         activeTab={activeTab}
@@ -27,21 +27,21 @@ export function AdminDashboard({ username, role, onLogout }: AdminDashboardProps
       />
 
       <div className="flex-1 overflow-auto">
-        <div className="p-8">
-          <div className="mb-6">
-            <h2 className="text-gray-900">
-              Xin chào, {username}
-            </h2>
-            <p className="text-gray-600">Bảng điều khiển {role}</p>
-          </div>
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 shadow-lg">
+          <h2 className="text-white">
+            Xin chào, {username}
+          </h2>
+          <p className="text-blue-100">Bảng điều khiển {role}</p>
+        </div>
 
+        <div className="p-8">
           {activeTab === "dashboard" && <AdminOverviewTab />}
           {activeTab === "accounts" && <AccountManagementTab role={role} />}
           {activeTab === "residents" && <ResidentManagementTab role={role} />}
           {activeTab === "apartments" && <ApartmentManagementTab role={role} />}
           {activeTab === "building-managers" && <BuildingManagersTab role={role} />}
           {activeTab === "accountants" && <AccountantsTab role={role} />}
-          {activeTab === "offline-payments" && <OfflinePaymentsTab />}
+          {activeTab === "offline-payments" && <OfflinePaymentsTab role={role} />}
         </div>
       </div>
     </div>
