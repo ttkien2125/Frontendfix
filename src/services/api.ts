@@ -1,5 +1,5 @@
 // API Configuration - Update this to point to your Python backend
-const API_BASE_URL = "http://localhost:8000/api";
+const API_BASE_URL = "http://localhost:8000";
 
 // ==================== TYPE DEFINITIONS ====================
 
@@ -296,7 +296,7 @@ export const api = {
       username: string,
       password: string
     ): Promise<LoginResponse> => {
-      const response = await fetchApi<LoginResponse>("/auth/login", {
+      const response = await fetchApi<LoginResponse>("/api/auth/login", {
         method: "POST",
         body: JSON.stringify({ username, password }),
       });
@@ -312,7 +312,7 @@ export const api = {
     },
 
     me: async (): Promise<MeResponse> => {
-      return fetchApi<MeResponse>("/auth/me", {
+      return fetchApi<MeResponse>("/api/auth/me", {
         method: "GET",
       });
     },
@@ -327,20 +327,20 @@ export const api = {
   // ==================== ACCOUNT MANAGEMENT ====================
   accounts: {
     create: async (account: AccountCreate): Promise<AccountResponse> => {
-      return fetchApi<AccountResponse>("/accounts/account", {
+      return fetchApi<AccountResponse>("/api/accounts/account", {
         method: "POST",
         body: JSON.stringify(account),
       });
     },
 
     get: async (username: string): Promise<AccountResponse> => {
-      return fetchApi<AccountResponse>(`/accounts/managers/${username}`, {
+      return fetchApi<AccountResponse>(`/api/accounts/managers/${username}`, {
         method: "GET",
       });
     },
 
     delete: async (username: string): Promise<void> => {
-      return fetchApi<void>(`/accounts/${username}`, {
+      return fetchApi<void>(`/api/accounts/${username}`, {
         method: "DELETE",
       });
     },
@@ -350,7 +350,7 @@ export const api = {
       roleData: AccountRoleUpdate
     ): Promise<AccountResponse> => {
       return fetchApi<AccountResponse>(
-        `/accounts/managers/${username}/role`,
+        `/api/accounts/managers/${username}/role`,
         {
           method: "PATCH",
           body: JSON.stringify(roleData),
@@ -363,7 +363,7 @@ export const api = {
       passwordData: AccountPasswordUpdate
     ): Promise<AccountResponse> => {
       return fetchApi<AccountResponse>(
-        `/accounts/managers/${username}/password`,
+        `/api/accounts/managers/${username}/password`,
         {
           method: "PATCH",
           body: JSON.stringify(passwordData),
@@ -379,13 +379,13 @@ export const api = {
       limit: number = 100
     ): Promise<Apartment[]> => {
       return fetchApi<Apartment[]>(
-        `/apartments/get-apartments-data?skip=${skip}&limit=${limit}`,
+        `/api/apartments/get-apartments-data?skip=${skip}&limit=${limit}`,
         { method: "GET" }
       );
     },
 
     create: async (apartment: ApartmentCreate): Promise<Apartment> => {
-      return fetchApi<Apartment>("/apartments/add-new-apartment", {
+      return fetchApi<Apartment>("/api/apartments/add-new-apartment", {
         method: "POST",
         body: JSON.stringify(apartment),
       });
@@ -395,14 +395,14 @@ export const api = {
       id: string,
       apartment: Partial<Apartment>
     ): Promise<Apartment> => {
-      return fetchApi<Apartment>(`/apartments/${id}`, {
+      return fetchApi<Apartment>(`/api/apartments/${id}`, {
         method: "PUT",
         body: JSON.stringify(apartment),
       });
     },
 
     delete: async (id: string): Promise<void> => {
-      return fetchApi<void>(`/apartments/${id}`, {
+      return fetchApi<void>(`/api/apartments/${id}`, {
         method: "DELETE",
       });
     },
@@ -415,7 +415,7 @@ export const api = {
       limit: number = 100
     ): Promise<Resident[]> => {
       return fetchApi<Resident[]>(
-        `/residents/get-residents-data?skip=${skip}&limit=${limit}`,
+        `/api/residents/get-residents-data?skip=${skip}&limit=${limit}`,
         { method: "GET" }
       );
     },
@@ -425,7 +425,7 @@ export const api = {
       apartmentId: string
     ): Promise<Resident> => {
       return fetchApi<Resident>(
-        `/residents/resident_detail?fullname=${encodeURIComponent(
+        `/api/residents/resident_detail?fullname=${encodeURIComponent(
           fullname
         )}&apartment_id=${encodeURIComponent(apartmentId)}`,
         { method: "GET" }
@@ -433,7 +433,7 @@ export const api = {
     },
 
     create: async (resident: ResidentCreate): Promise<Resident> => {
-      return fetchApi<Resident>("/residents/add-new-resident", {
+      return fetchApi<Resident>("/api/residents/add-new-resident", {
         method: "POST",
         body: JSON.stringify(resident),
       });
@@ -443,14 +443,14 @@ export const api = {
       id: number,
       resident: ResidentUpdate
     ): Promise<Resident> => {
-      return fetchApi<Resident>(`/residents/${id}`, {
+      return fetchApi<Resident>(`/api/residents/${id}`, {
         method: "PUT",
         body: JSON.stringify(resident),
       });
     },
 
     delete: async (id: number): Promise<void> => {
-      return fetchApi<void>(`/residents/${id}`, {
+      return fetchApi<void>(`/api/residents/${id}`, {
         method: "DELETE",
       });
     },
@@ -459,13 +459,13 @@ export const api = {
   // ==================== BILLS ====================
   bills: {
     getMyBills: async (): Promise<Bill[]> => {
-      return fetchApi<Bill[]>("/bills/my-bills", {
+      return fetchApi<Bill[]>("/api/bills/my-bills", {
         method: "GET",
       });
     },
 
     create: async (bill: BillCreate): Promise<Bill> => {
-      return fetchApi<Bill>("/bills/", {
+      return fetchApi<Bill>("/api/bills/", {
         method: "POST",
         body: JSON.stringify(bill),
       });
@@ -475,13 +475,13 @@ export const api = {
   // ==================== BUILDING MANAGERS ====================
   buildingManagers: {
     getAll: async (): Promise<BuildingManager[]> => {
-      return fetchApi<BuildingManager[]>("/building-managers/", {
+      return fetchApi<BuildingManager[]>("/api/building-managers/", {
         method: "GET",
       });
     },
 
     get: async (id: number): Promise<BuildingManager> => {
-      return fetchApi<BuildingManager>(`/building-managers/${id}`, {
+      return fetchApi<BuildingManager>(`/api/building-managers/${id}`, {
         method: "GET",
       });
     },
@@ -489,7 +489,7 @@ export const api = {
     create: async (
       manager: BuildingManagerCreate
     ): Promise<BuildingManager> => {
-      return fetchApi<BuildingManager>("/building-managers/", {
+      return fetchApi<BuildingManager>("/api/building-managers/", {
         method: "POST",
         body: JSON.stringify(manager),
       });
@@ -499,14 +499,14 @@ export const api = {
       id: number,
       manager: BuildingManagerUpdate
     ): Promise<BuildingManager> => {
-      return fetchApi<BuildingManager>(`/building-managers/${id}`, {
+      return fetchApi<BuildingManager>(`/api/building-managers/${id}`, {
         method: "PATCH",
         body: JSON.stringify(manager),
       });
     },
 
     delete: async (id: number): Promise<void> => {
-      return fetchApi<void>(`/building-managers/${id}`, {
+      return fetchApi<void>(`/api/building-managers/${id}`, {
         method: "DELETE",
       });
     },
@@ -515,7 +515,7 @@ export const api = {
   // ==================== BUILDINGS ====================
   buildings: {
     getByManager: async (managerId: number): Promise<Building[]> => {
-      return fetchApi<Building[]>(`/buildings/manager/${managerId}`, {
+      return fetchApi<Building[]>(`/api/buildings/manager/${managerId}`, {
         method: "GET",
       });
     },
@@ -524,7 +524,7 @@ export const api = {
       buildingId: string,
       data: BuildingUpdateManager
     ): Promise<Building> => {
-      return fetchApi<Building>(`/buildings/${buildingId}/manager`, {
+      return fetchApi<Building>(`/api/buildings/${buildingId}/manager`, {
         method: "PUT",
         body: JSON.stringify(data),
       });
@@ -534,19 +534,19 @@ export const api = {
   // ==================== ACCOUNTANTS ====================
   accountants: {
     getAll: async (): Promise<Accountant[]> => {
-      return fetchApi<Accountant[]>("/accountants/", {
+      return fetchApi<Accountant[]>("/api/accountants/", {
         method: "GET",
       });
     },
 
     get: async (id: number): Promise<Accountant> => {
-      return fetchApi<Accountant>(`/accountants/${id}`, {
+      return fetchApi<Accountant>(`/api/accountants/${id}`, {
         method: "GET",
       });
     },
 
     create: async (accountant: AccountantCreate): Promise<Accountant> => {
-      return fetchApi<Accountant>("/accountants/", {
+      return fetchApi<Accountant>("/api/accountants/", {
         method: "POST",
         body: JSON.stringify(accountant),
       });
@@ -556,14 +556,14 @@ export const api = {
       id: number,
       accountant: AccountantUpdate
     ): Promise<Accountant> => {
-      return fetchApi<Accountant>(`/accountants/${id}`, {
+      return fetchApi<Accountant>(`/api/accountants/${id}`, {
         method: "PATCH",
         body: JSON.stringify(accountant),
       });
     },
 
     delete: async (id: number): Promise<void> => {
-      return fetchApi<void>(`/accountants/${id}`, {
+      return fetchApi<void>(`/api/accountants/${id}`, {
         method: "DELETE",
       });
     },
@@ -572,21 +572,21 @@ export const api = {
   // ==================== ONLINE PAYMENTS ====================
   payments: {
     createQR: async (billIds: number[]): Promise<QRCodeResponse> => {
-      return fetchApi<QRCodeResponse>("/online-payments/create-qr", {
+      return fetchApi<QRCodeResponse>("/api/payments/create-qr", {
         method: "POST",
         body: JSON.stringify({ bill_ids: billIds }),
       });
     },
 
     checkExpiry: async (): Promise<any> => {
-      return fetchApi<any>("/online-payments/check-expiry", {
+      return fetchApi<any>("/api/payments/check-expiry", {
         method: "POST",
       });
     },
 
     // Get payment history for current user
     getMyHistory: async (): Promise<PaymentTransaction[]> => {
-      return fetchApi<PaymentTransaction[]>("/payments/my-history", {
+      return fetchApi<PaymentTransaction[]>("/api/payments/my-history", {
         method: "GET",
       });
     },
@@ -597,7 +597,7 @@ export const api = {
     create: async (
       payment: OfflinePaymentRequest
     ): Promise<PaymentResponse> => {
-      return fetchApi<PaymentResponse>("/offline-payments/offline_payment", {
+      return fetchApi<PaymentResponse>("/api/offline-payments/offline_payment", {
         method: "POST",
         body: JSON.stringify(payment),
       });
@@ -607,7 +607,7 @@ export const api = {
   // ==================== RECEIPTS ====================
   receipts: {
     get: async (transactionId: number): Promise<ReceiptResponse> => {
-      return fetchApi<ReceiptResponse>(`/receipts/${transactionId}`, {
+      return fetchApi<ReceiptResponse>(`/api/receipts/${transactionId}`, {
         method: "GET",
       });
     },
