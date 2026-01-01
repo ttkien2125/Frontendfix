@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "../custom-ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Users, Building, FileText, UserCog } from "lucide-react";
 
 export function AdminOverviewTab() {
@@ -23,7 +23,7 @@ export function AdminOverviewTab() {
           </CardHeader>
           <CardContent>
             <div className="text-gray-900">-</div>
-            <p className="text-xs text-gray-500 mt-1">Đang c���p nhật</p>
+            <p className="text-xs text-gray-500 mt-1">Đang cập nhật</p>
           </CardContent>
         </Card>
 

@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "../custom-ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { ShieldAlert } from "lucide-react";
 import { Permissions, UserRole } from "../../utils/permissions";
 
