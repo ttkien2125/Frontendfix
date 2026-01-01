@@ -56,7 +56,7 @@ export function LoginPage({ onLogin, loading }: LoginPageProps) {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   disabled={loading}
-                  className="text-center pl-10"
+                  className="pl-10"
                 />
               </div>
             </div>
