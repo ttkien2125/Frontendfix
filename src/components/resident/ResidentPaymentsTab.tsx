@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { api, PaymentTransaction, Bill } from "../../services/api";
 import { LoadingSpinner } from "../shared/LoadingSpinner";
 import { toast } from "sonner";
@@ -12,6 +13,8 @@ export function ResidentPaymentsTab() {
   const [unpaidBills, setUnpaidBills] = useState<Bill[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBills, setSelectedBills] = useState<number[]>([]);
+  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
+  const [showQrModal, setShowQrModal] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -39,8 +42,9 @@ export function ResidentPaymentsTab() {
     }
 
     try {
-      await api.payments.createQR(selectedBills);
-      toast.success("Tạo mã QR thanh toán thành công!");
+      const response = await api.payments.createQR(selectedBills);
+      setQrCodeUrl(response.qrCodeUrl);
+      setShowQrModal(true);
       setSelectedBills([]);
       loadData();
     } catch (error: any) {
@@ -165,6 +169,41 @@ export function ResidentPaymentsTab() {
           )}
         </CardContent>
       </Card>
+
+      {/* QR Code Modal */}
+      <Dialog open={showQrModal} onOpenChange={setShowQrModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center text-blue-900">Mã QR Thanh Toán</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center space-y-4 p-6">
+            {qrCodeUrl ? (
+              <>
+                <div className="bg-white p-4 rounded-lg shadow-md border-2 border-blue-200">
+                  <img
+                    src={qrCodeUrl}
+                    alt="QR Code Thanh Toán"
+                    className="w-full max-w-sm h-auto"
+                  />
+                </div>
+                <p className="text-center text-gray-600 text-sm">
+                  Quét mã QR để thanh toán hóa đơn
+                </p>
+                <Button
+                  onClick={() => setShowQrModal(false)}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  Đóng
+                </Button>
+              </>
+            ) : (
+              <div className="py-8">
+                <p className="text-gray-500 text-center">Không có mã QR</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

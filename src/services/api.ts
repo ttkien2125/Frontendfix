@@ -203,6 +203,13 @@ export interface PaymentResponse {
   billsPaid: number;
 }
 
+export interface QRCodeResponse {
+  qrCodeUrl: string;
+  transactionId?: number;
+  amount?: number;
+  expiry?: string;
+}
+
 // Receipt Types
 export interface ReceiptBillDetail {
   billID: number;
@@ -564,8 +571,8 @@ export const api = {
 
   // ==================== ONLINE PAYMENTS ====================
   payments: {
-    createQR: async (billIds: number[]): Promise<any> => {
-      return fetchApi<any>("/online-payments/create-qr", {
+    createQR: async (billIds: number[]): Promise<QRCodeResponse> => {
+      return fetchApi<QRCodeResponse>("/online-payments/create-qr", {
         method: "POST",
         body: JSON.stringify({ bill_ids: billIds }),
       });
