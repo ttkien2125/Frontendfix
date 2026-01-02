@@ -139,14 +139,13 @@ export interface BuildingManagerUpdate {
 // Building Types
 export interface Building {
   buildingID: string;
-  buildingName?: string;
-  address?: string;
-  numFloors?: number;
-  managerID?: number;
+  address?: string | null;
+  numApartment?: number | null;
+  managerID?: number | null;
 }
 
 export interface BuildingUpdateManager {
-  managerID: number;
+  managerID?: number | null;
 }
 
 // Accountant Types

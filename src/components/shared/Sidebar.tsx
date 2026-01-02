@@ -1,4 +1,4 @@
-import { Home, FileText, CreditCard, Building, Users, UserCog, ClipboardList, LogOut, Receipt } from "lucide-react";
+import { Home, FileText, CreditCard, Building, Users, UserCog, ClipboardList, LogOut, Receipt, Building2 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Permissions, UserRole } from "../../utils/permissions";
 
@@ -48,6 +48,10 @@ export function Sidebar({ role, activeTab, onTabChange, onLogout }: SidebarProps
 
     if (Permissions.canViewApartments(userRole)) {
       items.push({ id: "apartments", label: "Căn hộ", icon: Building });
+    }
+
+    if (Permissions.canManageBuildings(userRole)) {
+      items.push({ id: "buildings", label: "Tòa nhà", icon: Building2 });
     }
 
     if (Permissions.canManageBuildingManagers(userRole)) {

@@ -131,7 +131,7 @@ export function ReceiptManagementTab({ role }: ReceiptManagementTabProps) {
             Tra cứu biên lai thanh toán
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-6">
+        <CardContent className="pt-4">
           <form onSubmit={handleSearch} className="space-y-4">
             <div className="flex items-end gap-4">
               <div className="flex-1 space-y-2">
