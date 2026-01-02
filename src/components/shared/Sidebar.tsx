@@ -37,11 +37,10 @@ export function Sidebar({ role, activeTab, onTabChange, onLogout }: SidebarProps
       items.push({ id: "receipts", label: "Biên lai thanh toán", icon: Receipt });
     }
 
-    // Manager/Admin menu items
-    if (Permissions.canManageAccounts(userRole)) {
-      items.push({ id: "accounts", label: "Quản lý tài khoản", icon: UserCog });
-    }
+    // Accounts - Available to all users (password change)
+    items.push({ id: "accounts", label: "Tài khoản", icon: UserCog });
 
+    // Manager/Admin menu items
     if (Permissions.canManageResidents(userRole)) {
       items.push({ id: "residents", label: "Cư dân", icon: Users });
     }
