@@ -3,12 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
 import { Checkbox } from "../ui/checkbox";
-import { ShieldAlert, Users, Plus, Pencil, Trash2 } from "lucide-react";
-import { api, Resident, ResidentCreate, ResidentUpdate } from "../../services/api";
+import { ShieldAlert, Users, Plus, Pencil, Trash2, Building2 } from "lucide-react";
+import { api, Resident, ResidentCreate, ResidentUpdate, Apartment } from "../../services/api";
 import { LoadingSpinner } from "../shared/LoadingSpinner";
 import { Permissions, UserRole } from "../../utils/permissions";
 import { toast } from "sonner@2.0.3";
@@ -19,7 +20,9 @@ interface ResidentManagementTabProps {
 
 export function ResidentManagementTab({ role }: ResidentManagementTabProps) {
   const [residents, setResidents] = useState<Resident[]>([]);
+  const [apartments, setApartments] = useState<Apartment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingApartments, setLoadingApartments] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -64,6 +67,50 @@ export function ResidentManagementTab({ role }: ResidentManagementTabProps) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadApartments = async () => {
+    setLoadingApartments(true);
+    try {
+      const data = await api.apartments.getAll();
+      setApartments(data);
+    } catch (error) {
+      console.error("Failed to load apartments:", error);
+      toast.error("Không thể tải danh sách căn hộ");
+    } finally {
+      setLoadingApartments(false);
+    }
+  };
+
+  // Load apartments when create dialog opens
+  const handleCreateDialogOpen = (open: boolean) => {
+    setCreateDialogOpen(open);
+    if (open && apartments.length === 0) {
+      loadApartments();
+    }
+  };
+
+  // Load apartments when edit dialog opens
+  const openEditDialog = (resident: Resident) => {
+    setSelectedResident(resident);
+    setEditForm({
+      apartmentID: resident.apartmentID,
+      fullName: resident.fullName,
+      age: resident.age,
+      date: resident.date,
+      phoneNumber: resident.phoneNumber,
+      isOwner: resident.isOwner,
+      username: resident.username,
+    });
+    setEditDialogOpen(true);
+    if (apartments.length === 0) {
+      loadApartments();
+    }
+  };
+
+  const openDeleteDialog = (resident: Resident) => {
+    setSelectedResident(resident);
+    setDeleteDialogOpen(true);
   };
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -114,25 +161,6 @@ export function ResidentManagementTab({ role }: ResidentManagementTabProps) {
     }
   };
 
-  const openEditDialog = (resident: Resident) => {
-    setSelectedResident(resident);
-    setEditForm({
-      apartmentID: resident.apartmentID,
-      fullName: resident.fullName,
-      age: resident.age,
-      date: resident.date,
-      phoneNumber: resident.phoneNumber,
-      isOwner: resident.isOwner,
-      username: resident.username,
-    });
-    setEditDialogOpen(true);
-  };
-
-  const openDeleteDialog = (resident: Resident) => {
-    setSelectedResident(resident);
-    setDeleteDialogOpen(true);
-  };
-
   if (!canAccess) {
     return (
       <Card className="shadow-lg">
@@ -156,7 +184,7 @@ export function ResidentManagementTab({ role }: ResidentManagementTabProps) {
       <Card className="shadow-lg border-blue-200">
         <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg flex flex-row items-center justify-between">
           <CardTitle className="text-white">Danh sách cư dân</CardTitle>
-          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+          <Dialog open={createDialogOpen} onOpenChange={handleCreateDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-white text-blue-600 hover:bg-blue-50">
                 <Plus className="w-4 h-4 mr-2" />
@@ -183,11 +211,42 @@ export function ResidentManagementTab({ role }: ResidentManagementTabProps) {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="create-apartmentID">Mã căn hộ</Label>
-                    <Input
-                      id="create-apartmentID"
+                    <Select
                       value={createForm.apartmentID}
-                      onChange={(e) => setCreateForm({ ...createForm, apartmentID: e.target.value })}
-                    />
+                      onValueChange={(value) => setCreateForm({ ...createForm, apartmentID: value })}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Chọn căn hộ">
+                          {createForm.apartmentID || "Chọn căn hộ"}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {loadingApartments ? (
+                          <div className="p-4 text-center text-gray-500">
+                            <div className="flex items-center justify-center gap-2">
+                              <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                              <span className="text-sm">Đang tải...</span>
+                            </div>
+                          </div>
+                        ) : apartments.length === 0 ? (
+                          <div className="p-4 text-center text-gray-500">
+                            <Building2 className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                            <p className="text-sm">Không có căn hộ nào</p>
+                          </div>
+                        ) : (
+                          apartments.map((apartment) => (
+                            <SelectItem key={apartment.apartmentID} value={apartment.apartmentID}>
+                              <div className="flex items-center justify-between gap-3">
+                                <span className="font-medium">{apartment.apartmentID}</span>
+                                <span className="text-xs text-gray-500">
+                                  {apartment.area}m² · {apartment.status}
+                                </span>
+                              </div>
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="create-age">Tuổi</Label>
@@ -326,11 +385,42 @@ export function ResidentManagementTab({ role }: ResidentManagementTabProps) {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-apartmentID">Mã căn hộ</Label>
-                <Input
-                  id="edit-apartmentID"
+                <Select
                   value={editForm.apartmentID}
-                  onChange={(e) => setEditForm({ ...editForm, apartmentID: e.target.value })}
-                />
+                  onValueChange={(value) => setEditForm({ ...editForm, apartmentID: value })}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Chọn căn hộ">
+                      {editForm.apartmentID || "Chọn căn hộ"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {loadingApartments ? (
+                      <div className="p-4 text-center text-gray-500">
+                        <div className="flex items-center justify-center gap-2">
+                          <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                          <span className="text-sm">Đang tải...</span>
+                        </div>
+                      </div>
+                    ) : apartments.length === 0 ? (
+                      <div className="p-4 text-center text-gray-500">
+                        <Building2 className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                        <p className="text-sm">Không có căn hộ nào</p>
+                      </div>
+                    ) : (
+                      apartments.map((apartment) => (
+                        <SelectItem key={apartment.apartmentID} value={apartment.apartmentID}>
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="font-medium">{apartment.apartmentID}</span>
+                            <span className="text-xs text-gray-500">
+                              {apartment.area}m² · {apartment.status}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-age">Tuổi</Label>
