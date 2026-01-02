@@ -253,8 +253,11 @@ export function ResidentManagementTab({ role }: ResidentManagementTabProps) {
                     <Input
                       id="create-age"
                       type="number"
+                      min="0"
+                      max="150"
                       value={createForm.age || ""}
                       onChange={(e) => setCreateForm({ ...createForm, age: e.target.value ? parseInt(e.target.value) : undefined })}
+                      placeholder="Ví dụ: 25"
                     />
                   </div>
                   <div className="space-y-2">
@@ -427,8 +430,11 @@ export function ResidentManagementTab({ role }: ResidentManagementTabProps) {
                 <Input
                   id="edit-age"
                   type="number"
+                  min="0"
+                  max="150"
                   value={editForm.age || ""}
                   onChange={(e) => setEditForm({ ...editForm, age: e.target.value ? parseInt(e.target.value) : undefined })}
+                  placeholder="Ví dụ: 25"
                 />
               </div>
               <div className="space-y-2">
