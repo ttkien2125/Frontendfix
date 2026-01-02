@@ -158,6 +158,11 @@ export function ApartmentManagementTab({ role }: ApartmentManagementTabProps) {
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleCreate} className="space-y-4">
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-sm text-blue-800">
+                    💡 <strong>Lưu ý:</strong> Số cư dân sẽ tự động được cập nhật khi bạn thêm hoặc xóa cư dân khỏi căn hộ này.
+                  </p>
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="create-apartmentID">Mã căn hộ *</Label>
                   <Input
@@ -223,7 +228,12 @@ export function ApartmentManagementTab({ role }: ApartmentManagementTabProps) {
                     <TableHead className="text-blue-900">Diện tích (m²)</TableHead>
                     <TableHead className="text-blue-900">Trạng thái</TableHead>
                     <TableHead className="text-blue-900">Mã tòa nhà</TableHead>
-                    <TableHead className="text-blue-900">Số cư dân</TableHead>
+                    <TableHead className="text-blue-900">
+                      <div className="flex items-center gap-1">
+                        <span>Số cư dân</span>
+                        <span className="text-xs text-blue-600" title="Tự động cập nhật khi thêm/xóa cư dân">(Auto)</span>
+                      </div>
+                    </TableHead>
                     <TableHead className="text-blue-900 text-right">Hành động</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -274,6 +284,14 @@ export function ApartmentManagementTab({ role }: ApartmentManagementTabProps) {
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleEdit} className="space-y-4">
+            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-blue-800">
+                  <strong>Số cư dân hiện tại:</strong> {selectedApartment?.numResident || 0} người
+                </p>
+                <span className="text-xs text-blue-600">(Tự động cập nhật)</span>
+              </div>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="edit-apartmentID">Mã căn hộ *</Label>
               <Input
