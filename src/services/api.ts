@@ -231,6 +231,49 @@ export interface Receipt {
   bills: ReceiptBillDetail[];
 }
 
+// Notification Types
+export interface Notification {
+  notificationID: number;
+  residentID: number;
+  title: string;
+  content: string;
+  createdDate: string;
+  isRead: boolean;
+  electricity?: number | null;
+  water?: number | null;
+}
+
+export interface BroadcastNotification {
+  title: string;
+  content: string;
+}
+
+// Accounting Types
+export interface MeterReadingCreate {
+  apartmentID: string;
+  month: number;
+  year: number;
+  oldElectricity: number;
+  newElectricity: number;
+  oldWater: number;
+  newWater: number;
+}
+
+export interface ServiceFeeCreate {
+  buildingID: string;
+  typeOfBill: string;
+  feePerUnit?: number | null;
+  flatFee?: number | null;
+  effectiveDate: string;
+}
+
+export interface CalculateBillsRequest {
+  month: number;
+  year: number;
+  deadline_day?: number;
+  overwrite?: boolean;
+}
+
 // ==================== API ERROR CLASS ====================
 
 export class ApiError extends Error {
@@ -607,6 +650,92 @@ export const api = {
   receipts: {
     get: async (transactionId: number): Promise<Receipt> => {
       return fetchApi<Receipt>(`/api/receipts/${transactionId}`, {
+        method: "GET",
+      });
+    },
+  },
+
+  // ==================== NOTIFICATIONS ====================
+  notifications: {
+    // Get my notifications
+    getMyNotifications: async (skip: number = 0, limit: number = 50): Promise<Notification[]> => {
+      return fetchApi<Notification[]>(
+        `/api/notification/my-notification?skip=${skip}&limit=${limit}`,
+        {
+          method: "GET",
+        }
+      );
+    },
+
+    // Mark notification as read
+    markAsRead: async (id: number): Promise<{ message: string }> => {
+      return fetchApi<{ message: string }>(`/api/notification/${id}/read`, {
+        method: "PUT",
+      });
+    },
+
+    // Get unread count
+    getUnreadCount: async (): Promise<{ count: number }> => {
+      return fetchApi<{ count: number }>("/api/notification/unread-count", {
+        method: "GET",
+      });
+    },
+
+    // Broadcast notification (Manager/Admin only)
+    broadcast: async (notification: BroadcastNotification): Promise<{ message: string }> => {
+      return fetchApi<{ message: string }>("/api/notification/broadcast", {
+        method: "POST",
+        body: JSON.stringify(notification),
+      });
+    },
+  },
+
+  // ==================== ACCOUNTING ====================
+  accounting: {
+    // Record meter readings
+    recordMeterReading: async (data: MeterReadingCreate): Promise<{ message: string }> => {
+      return fetchApi<{ message: string }>("/api/accounting/meter-readings", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+
+    // Set service fees
+    setServiceFee: async (data: ServiceFeeCreate): Promise<{ message: string }> => {
+      return fetchApi<{ message: string }>("/api/accounting/service-fees", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+
+    // Calculate monthly bills
+    calculateBills: async (
+      data: CalculateBillsRequest
+    ): Promise<{ status: string; message: string; count: number }> => {
+      return fetchApi<{ status: string; message: string; count: number }>(
+        "/api/accounting/bills/calculate",
+        {
+          method: "POST",
+          body: JSON.stringify(data),
+        }
+      );
+    },
+
+    // Get all bills with optional filters
+    getAllBills: async (
+      apartmentId?: string,
+      status?: string
+    ): Promise<Bill[]> => {
+      const params = new URLSearchParams();
+      if (apartmentId) params.append("apartment_id", apartmentId);
+      if (status) params.append("status", status);
+
+      const queryString = params.toString();
+      const endpoint = queryString
+        ? `/api/accounting/bills?${queryString}`
+        : "/api/accounting/bills";
+
+      return fetchApi<Bill[]>(endpoint, {
         method: "GET",
       });
     },
