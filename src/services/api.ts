@@ -218,15 +218,15 @@ export interface ReceiptBillDetail {
   dueDate: string;
 }
 
-export interface ReceiptResponse {
+export interface Receipt {
   transID: number;
   residentID: number;
   residentName: string;
   apartmentID: string;
-  phoneNumber?: string;
+  phoneNumber?: string | null;
   totalAmount: number;
   paymentMethod: string;
-  paymentContent?: string;
+  paymentContent?: string | null;
   status: string;
   payDate: string;
   bills: ReceiptBillDetail[];
@@ -606,8 +606,8 @@ export const api = {
 
   // ==================== RECEIPTS ====================
   receipts: {
-    get: async (transactionId: number): Promise<ReceiptResponse> => {
-      return fetchApi<ReceiptResponse>(`/api/receipts/${transactionId}`, {
+    get: async (transactionId: number): Promise<Receipt> => {
+      return fetchApi<Receipt>(`/api/receipts/${transactionId}`, {
         method: "GET",
       });
     },
