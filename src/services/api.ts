@@ -474,6 +474,16 @@ export const api = {
       );
     },
 
+    // Get residents by apartment ID
+    getByApartment: async (apartmentId: string): Promise<Resident[]> => {
+      const allResidents = await fetchApi<Resident[]>(
+        `/api/residents/get-residents-data?skip=0&limit=1000`,
+        { method: "GET" }
+      );
+      // Filter by apartment ID on the client side
+      return allResidents.filter(r => r.apartmentID === apartmentId);
+    },
+
     create: async (resident: ResidentCreate): Promise<Resident> => {
       return fetchApi<Resident>("/api/residents/add-new-resident", {
         method: "POST",
