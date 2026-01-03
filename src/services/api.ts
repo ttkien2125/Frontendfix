@@ -566,6 +566,12 @@ export const api = {
 
   // ==================== BUILDINGS ====================
   buildings: {
+    getAll: async (): Promise<Building[]> => {
+      return fetchApi<Building[]>("/api/buildings/", {
+        method: "GET",
+      });
+    },
+
     getByManager: async (managerId: number): Promise<Building[]> => {
       return fetchApi<Building[]>(`/api/buildings/manager/${managerId}`, {
         method: "GET",

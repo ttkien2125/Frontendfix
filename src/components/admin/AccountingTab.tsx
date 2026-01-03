@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { ShieldAlert, FileUp, FileEdit, DollarSign, Calculator, Plus, Upload } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { api, MeterReadingCreate, ServiceFeeCreate, CalculateBillsRequest, Apartment } from "../../services/api";
+import { api, MeterReadingCreate, ServiceFeeCreate, CalculateBillsRequest, Apartment, Building } from "../../services/api";
 import { Permissions, UserRole } from "../../utils/permissions";
 import { toast } from "sonner@2.0.3";
 import { useEffect } from "react";
@@ -37,6 +37,7 @@ export function AccountingTab({ role }: AccountingTabProps) {
 
   // Service Fee state
   const [showServiceFeeModal, setShowServiceFeeModal] = useState(false);
+  const [buildings, setBuildings] = useState<Building[]>([]);
   const [serviceFee, setServiceFee] = useState<ServiceFeeCreate>({
     buildingID: "",
     typeOfBill: "Electricity",
@@ -44,6 +45,7 @@ export function AccountingTab({ role }: AccountingTabProps) {
     flatFee: null,
     effectiveDate: new Date().toISOString().split("T")[0],
   });
+  const [otherBillType, setOtherBillType] = useState("");
   const [processingServiceFee, setProcessingServiceFee] = useState(false);
 
   // Calculate Bills state
@@ -66,7 +68,17 @@ export function AccountingTab({ role }: AccountingTabProps) {
       }
     };
 
+    const fetchBuildings = async () => {
+      try {
+        const buildings = await api.buildings.getAll();
+        setBuildings(buildings);
+      } catch (error: any) {
+        toast.error(error.message || "Không thể tải danh sách tòa nhà");
+      }
+    };
+
     fetchApartments();
+    fetchBuildings();
   }, []);
 
   if (!canAccess) {
@@ -446,7 +458,7 @@ export function AccountingTab({ role }: AccountingTabProps) {
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Chọn căn hộ" />
+                        <SelectValue placeholder="Ch��n căn hộ" />
                       </SelectTrigger>
                       <SelectContent>
                         {apartments.map((apartment) => (
@@ -610,15 +622,23 @@ export function AccountingTab({ role }: AccountingTabProps) {
               <Label htmlFor="buildingID" className="text-gray-700 mb-2 block">
                 Mã tòa nhà *
               </Label>
-              <Input
-                id="buildingID"
-                type="text"
-                placeholder="VD: A, B, C"
+              <Select
                 value={serviceFee.buildingID}
-                onChange={(e) =>
-                  setServiceFee({ ...serviceFee, buildingID: e.target.value })
+                onValueChange={(value) =>
+                  setServiceFee({ ...serviceFee, buildingID: value })
                 }
-              />
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn tòa nhà" />
+                </SelectTrigger>
+                <SelectContent>
+                  {buildings.map((building) => (
+                    <SelectItem key={building.buildingID} value={building.buildingID}>
+                      {building.buildingID}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
@@ -627,9 +647,16 @@ export function AccountingTab({ role }: AccountingTabProps) {
               </Label>
               <Select
                 value={serviceFee.typeOfBill}
-                onValueChange={(value) =>
-                  setServiceFee({ ...serviceFee, typeOfBill: value })
-                }
+                onValueChange={(value) => {
+                  setServiceFee({ ...serviceFee, typeOfBill: value });
+                  // Reset fee fields when changing type
+                  if (value === "Electricity" || value === "Water") {
+                    setServiceFee(prev => ({ ...prev, typeOfBill: value, flatFee: null }));
+                  } else if (value === "Management" || value === "Parking" || value === "Internet") {
+                    setServiceFee(prev => ({ ...prev, typeOfBill: value, feePerUnit: null }));
+                  }
+                  // For "Other", keep both options available
+                }}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -645,16 +672,36 @@ export function AccountingTab({ role }: AccountingTabProps) {
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            {/* Show custom bill type input when "Other" is selected */}
+            {serviceFee.typeOfBill === "Other" && (
+              <div>
+                <Label htmlFor="otherBillType" className="text-gray-700 mb-2 block">
+                  Tên loại phí *
+                </Label>
+                <Input
+                  id="otherBillType"
+                  type="text"
+                  placeholder="VD: Phí bảo trì thang máy, Phí vệ sinh..."
+                  value={otherBillType}
+                  onChange={(e) => setOtherBillType(e.target.value)}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Nhập tên cụ thể cho loại phí này
+                </p>
+              </div>
+            )}
+
+            {/* Dynamic fee input based on typeOfBill */}
+            {(serviceFee.typeOfBill === "Electricity" || serviceFee.typeOfBill === "Water") && (
               <div>
                 <Label htmlFor="feePerUnit" className="text-gray-700 mb-2 block">
-                  Phí theo đơn vị (₫)
+                  Phí theo đơn vị (₫) *
                 </Label>
                 <Input
                   id="feePerUnit"
                   type="number"
                   step="0.01"
-                  placeholder="VD: 3500"
+                  placeholder={serviceFee.typeOfBill === "Electricity" ? "VD: 3500" : "VD: 15000"}
                   value={serviceFee.feePerUnit || ""}
                   onChange={(e) =>
                     setServiceFee({
@@ -663,12 +710,20 @@ export function AccountingTab({ role }: AccountingTabProps) {
                     })
                   }
                 />
-                <p className="text-xs text-gray-500 mt-1">Dùng cho điện, nước</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {serviceFee.typeOfBill === "Electricity" 
+                    ? "Đơn giá điện (₫/kWh)" 
+                    : "Đơn giá nước (₫/m³)"}
+                </p>
               </div>
+            )}
 
+            {(serviceFee.typeOfBill === "Management" || 
+              serviceFee.typeOfBill === "Parking" || 
+              serviceFee.typeOfBill === "Internet") && (
               <div>
                 <Label htmlFor="flatFee" className="text-gray-700 mb-2 block">
-                  Phí cố định (₫)
+                  Phí cố định (₫) *
                 </Label>
                 <Input
                   id="flatFee"
@@ -683,9 +738,55 @@ export function AccountingTab({ role }: AccountingTabProps) {
                     })
                   }
                 />
-                <p className="text-xs text-gray-500 mt-1">Dùng cho phí quản lý</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Phí cố định hàng tháng cho mỗi căn hộ
+                </p>
               </div>
-            </div>
+            )}
+
+            {serviceFee.typeOfBill === "Other" && (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="feePerUnit" className="text-gray-700 mb-2 block">
+                    Phí theo đơn vị (₫)
+                  </Label>
+                  <Input
+                    id="feePerUnit"
+                    type="number"
+                    step="0.01"
+                    placeholder="VD: 3500"
+                    value={serviceFee.feePerUnit || ""}
+                    onChange={(e) =>
+                      setServiceFee({
+                        ...serviceFee,
+                        feePerUnit: e.target.value ? parseFloat(e.target.value) : null,
+                      })
+                    }
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Nếu phí tính theo đơn vị</p>
+                </div>
+
+                <div>
+                  <Label htmlFor="flatFee" className="text-gray-700 mb-2 block">
+                    Phí cố định (₫)
+                  </Label>
+                  <Input
+                    id="flatFee"
+                    type="number"
+                    step="0.01"
+                    placeholder="VD: 100000"
+                    value={serviceFee.flatFee || ""}
+                    onChange={(e) =>
+                      setServiceFee({
+                        ...serviceFee,
+                        flatFee: e.target.value ? parseFloat(e.target.value) : null,
+                      })
+                    }
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Nếu phí cố định</p>
+                </div>
+              </div>
+            )}
 
             <div>
               <Label htmlFor="effectiveDate" className="text-gray-700 mb-2 block">

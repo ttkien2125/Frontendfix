@@ -1,0 +1,720 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{vietnam}
+\usepackage[T5]{fontenc}
+\usepackage{geometry}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{amssymb}
+
+\geometry{left=2cm,right=2cm,top=2cm,bottom=2cm}
+
+\definecolor{headerblue}{RGB}{0,102,204}
+
+\newcommand{\testcase}[9]{
+\begin{longtable}{|p{4cm}|p{11cm}|}
+\hline
+\rowcolor{gray!10}
+\textcolor{headerblue}{\textbf{Test No.}} & \textbf{#1} \\
+\hline
+\textcolor{headerblue}{\textbf{Current status}} & $\square$ Passed \quad $\square$ Failed \quad $\square$ Pending \\
+\hline
+\textcolor{headerblue}{\textbf{Title}} & \textit{#2} \\
+\hline
+\textcolor{headerblue}{\textbf{Description}} & #3 \\
+\hline
+\textcolor{headerblue}{\textbf{Approach}} & #4 \\
+\hline
+\multicolumn{2}{|c|}{\cellcolor{gray!10}\textcolor{headerblue}{\textbf{Test Steps}}} \\
+\hline
+\multicolumn{2}{|c|}{
+\begin{tabular}{|p{1cm}|p{4cm}|p{3cm}|p{3.5cm}|p{2cm}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Step} & \textbf{Action} & \textbf{Purpose} & \textbf{Expected result} & \textbf{Comment} \\
+\hline
+#5
+\end{tabular}
+} \\
+\hline
+\textcolor{headerblue}{\textbf{Concluding remark}} & #6 \\
+\hline
+\textcolor{headerblue}{\textbf{Testing team}} & #7 \\
+\hline
+\textcolor{headerblue}{\textbf{Date completed}} & #8 \\
+\hline
+\end{longtable}
+\vspace{1cm}
+}
+
+\begin{document}
+
+\title{\textbf{BÁO CÁO TEST CASES} \\ \Large Hệ thống Quản lý Tòa nhà BlueMoon}
+\author{Nhóm Phát triển BlueMoon}
+\date{\today}
+\maketitle
+
+\newpage
+\tableofcontents
+\newpage
+
+\section{Giới thiệu}
+
+Tài liệu này mô tả các test cases cho hệ thống quản lý tòa nhà BlueMoon. Hệ thống được phát triển với backend Python/FastAPI và frontend React/TypeScript, hỗ trợ 4 loại người dùng: Cư dân (Resident), Kế toán (Accountant), Quản lý (Manager), và Quản trị viên (Admin).
+
+\subsection{Mục đích kiểm thử}
+\begin{itemize}
+    \item Đảm bảo tính năng hoạt động đúng theo yêu cầu
+    \item Kiểm tra phân quyền truy cập theo vai trò
+    \item Xác minh tính toàn vẹn của dữ liệu
+    \item Đánh giá trải nghiệm người dùng
+\end{itemize}
+
+\subsection{Phạm vi kiểm thử}
+\begin{itemize}
+    \item Xác thực và phân quyền
+    \item Quản lý hóa đơn và thanh toán
+    \item Quản lý thông báo
+    \item Quản lý chỉ số công tơ
+    \item Quản lý căn hộ và cư dân
+    \item Tính năng kế toán
+\end{itemize}
+
+\newpage
+\section{Test Cases - Xác thực và Phân quyền}
+
+\testcase
+{TC-001}
+{Đăng nhập với thông tin hợp lệ}
+{Kiểm tra chức năng đăng nhập của người dùng với tài khoản và mật khẩu hợp lệ}
+{Functional testing - Kiểm thử chức năng cơ bản của hệ thống xác thực}
+{
+1 & Truy cập trang đăng nhập & Mở giao diện đăng nhập & Hiển thị form đăng nhập với các trường username và password & \\
+\hline
+2 & Nhập username hợp lệ & Kiểm tra validation & Chấp nhận input & \\
+\hline
+3 & Nhập password hợp lệ & Kiểm tra validation & Chấp nhận input & \\
+\hline
+4 & Nhấn nút "Đăng nhập" & Xác thực thông tin & Chuyển đến dashboard tương ứng với role & \\
+\hline
+5 & Kiểm tra session & Xác nhận trạng thái đăng nhập & Token được lưu trong localStorage & \\
+\hline
+}
+{Test case pass khi người dùng đăng nhập thành công và được chuyển đến dashboard phù hợp với vai trò của họ}
+{Lead: Nguyễn Văn A, Members: Trần Thị B, Lê Văn C}
+{03/01/2026}
+
+\testcase
+{TC-002}
+{Đăng nhập với thông tin không hợp lệ}
+{Kiểm tra xử lý lỗi khi người dùng nhập sai thông tin đăng nhập}
+{Negative testing - Kiểm thử trường hợp thất bại}
+{
+1 & Truy cập trang đăng nhập & Mở giao diện đăng nhập & Hiển thị form đăng nhập & \\
+\hline
+2 & Nhập username sai & Kiểm tra validation & Chấp nhận input & \\
+\hline
+3 & Nhập password sai & Kiểm tra validation & Chấp nhận input & \\
+\hline
+4 & Nhấn nút "Đăng nhập" & Xác thực thông tin & Hiển thị thông báo lỗi "Tên đăng nhập hoặc mật khẩu không đúng" & \\
+\hline
+5 & Kiểm tra session & Xác nhận không tạo session & Không có token trong localStorage & \\
+\hline
+}
+{Test case pass khi hệ thống hiển thị thông báo lỗi phù hợp và không cho phép truy cập}
+{Lead: Nguyễn Văn A, Members: Trần Thị B}
+{03/01/2026}
+
+\testcase
+{TC-003}
+{Kiểm tra phân quyền truy cập theo vai trò}
+{Xác minh rằng mỗi vai trò chỉ có thể truy cập các chức năng được phép}
+{Security testing - Kiểm thử bảo mật và phân quyền}
+{
+1 & Đăng nhập với tài khoản Resident & Kiểm tra quyền truy cập & Dashboard hiển thị: Tổng quan, Hóa đơn, Thanh toán, Thông báo, Tài khoản & \\
+\hline
+2 & Thử truy cập URL của Accountant & Kiểm tra bảo mật & Hệ thống từ chối truy cập & \\
+\hline
+3 & Đăng nhập với tài khoản Accountant & Kiểm tra quyền truy cập & Dashboard hiển thị: Tổng quan, Thanh toán ngoại tuyến, Quản lý kế toán, Biên lai, Tài khoản & \\
+\hline
+4 & Thử truy cập chức năng Admin & Kiểm tra bảo mật & Hệ thống từ chối truy cập & \\
+\hline
+5 & Kiểm tra với Manager và Admin & Đảm bảo đầy đủ & Mỗi role có quyền phù hợp & \\
+\hline
+}
+{Test case pass khi mỗi vai trò chỉ truy cập được các chức năng được phân quyền}
+{Lead: Lê Văn C, Members: Phạm Thị D, Hoàng Văn E}
+{03/01/2026}
+
+\newpage
+\section{Test Cases - Chức năng Cư dân (Resident)}
+
+\testcase
+{TC-004}
+{Cư dân xem danh sách hóa đơn}
+{Kiểm tra chức năng hiển thị danh sách hóa đơn của cư dân}
+{Functional testing - Kiểm thử hiển thị dữ liệu}
+{
+1 & Đăng nhập với tài khoản Resident & Truy cập hệ thống & Dashboard cư dân được hiển thị & \\
+\hline
+2 & Nhấn vào tab "Hóa đơn" & Mở trang hóa đơn & Hiển thị danh sách hóa đơn theo tháng & \\
+\hline
+3 & Kiểm tra thông tin hóa đơn & Xác minh dữ liệu & Hiển thị đầy đủ: Tháng, tổng tiền, trạng thái thanh toán & \\
+\hline
+4 & Lọc hóa đơn theo trạng thái & Kiểm tra filter & Danh sách cập nhật theo bộ lọc (Tất cả/Chưa thanh toán/Đã thanh toán) & \\
+\hline
+5 & Xem chi tiết hóa đơn & Kiểm tra dialog & Modal hiển thị chi tiết các khoản phí & \\
+\hline
+}
+{Test case pass khi cư dân có thể xem đầy đủ thông tin hóa đơn với các bộ lọc hoạt động chính xác}
+{Lead: Nguyễn Văn A, Members: Trần Thị B}
+{03/01/2026}
+
+\testcase
+{TC-005}
+{Cư dân xem lịch sử thanh toán}
+{Kiểm tra chức năng hiển thị lịch sử các giao dịch thanh toán}
+{Functional testing - Kiểm thử hiển thị lịch sử}
+{
+1 & Đăng nhập với tài khoản Resident & Truy cập hệ thống & Dashboard cư dân được hiển thị & \\
+\hline
+2 & Nhấn vào tab "Thanh toán" & Mở trang thanh toán & Hiển thị lịch sử thanh toán & \\
+\hline
+3 & Kiểm tra thông tin giao dịch & Xác minh dữ liệu & Hiển thị: Ngày thanh toán, số tiền, phương thức, trạng thái & \\
+\hline
+4 & Tìm kiếm theo ngày & Kiểm tra filter & Danh sách được lọc theo khoảng thời gian & \\
+\hline
+5 & Xem chi tiết giao dịch & Kiểm tra dialog & Modal hiển thị thông tin đầy đủ của giao dịch & \\
+\hline
+}
+{Test case pass khi cư dân có thể xem đầy đủ lịch sử thanh toán với các công cụ tìm kiếm hoạt động tốt}
+{Lead: Trần Thị B, Members: Lê Văn C}
+{03/01/2026}
+
+\testcase
+{TC-006}
+{Cư dân xem và quản lý thông báo}
+{Kiểm tra chức năng hiển thị và quản lý thông báo của cư dân}
+{Functional testing - Kiểm thử chức năng thông báo}
+{
+1 & Đăng nhập với tài khoản Resident & Truy cập hệ thống & Dashboard cư dân được hiển thị & \\
+\hline
+2 & Nhấn vào tab "Thông báo" & Mở trang thông báo & Hiển thị danh sách thông báo với stats (Tổng/Chưa đọc/Đã đọc) & \\
+\hline
+3 & Kiểm tra phân loại thông báo & Xác minh icon & Thông báo điện có icon lightning, nước có icon droplet & \\
+\hline
+4 & Lọc thông báo chưa đọc & Kiểm tra filter & Hiển thị chỉ thông báo chưa đọc với nền gradient xanh & \\
+\hline
+5 & Đánh dấu 1 thông báo đã đọc & Kiểm tra cập nhật & Thông báo chuyển sang trạng thái đã đọc, toast hiển thị & \\
+\hline
+6 & Đánh dấu tất cả đã đọc & Kiểm tra bulk action & Tất cả thông báo chuyển sang đã đọc, số lượng unread = 0 & \\
+\hline
+7 & Làm mới danh sách & Kiểm tra refresh & Danh sách được tải lại từ server & \\
+\hline
+}
+{Test case pass khi tất cả chức năng thông báo hoạt động chính xác với UI phản hồi nhanh}
+{Lead: Nguyễn Văn A, Members: Phạm Thị D}
+{03/01/2026}
+
+\newpage
+\section{Test Cases - Chức năng Kế toán (Accountant)}
+
+\testcase
+{TC-007}
+{Kế toán nhập chỉ số công tơ thủ công}
+{Kiểm tra chức năng nhập chỉ số công tơ điện và nước cho căn hộ}
+{Functional testing - Kiểm thử nhập liệu}
+{
+1 & Đăng nhập với tài khoản Accountant & Truy cập hệ thống & Dashboard kế toán được hiển thị & \\
+\hline
+2 & Nhấn vào tab "Quản lý kế toán" & Mở trang kế toán & Hiển thị các tabs: Chỉ số công tơ, Phí dịch vụ, Hóa đơn & \\
+\hline
+3 & Chọn tab "Chỉ số công tơ" & Mở form nhập & Hiển thị form với dropdown căn hộ và input điện/nước & \\
+\hline
+4 & Chọn căn hộ và tháng & Kiểm tra validation & Form chấp nhận input hợp lệ & \\
+\hline
+5 & Nhập chỉ số điện và nước & Kiểm tra validation & Chỉ chấp nhận số dương & \\
+\hline
+6 & Nhấn "Lưu chỉ số" & Thực hiện lưu & Hiển thị toast thành công, danh sách cập nhật & \\
+\hline
+7 & Kiểm tra dữ liệu đã lưu & Xác minh & Chỉ số xuất hiện trong bảng với thông tin chính xác & \\
+\hline
+}
+{Test case pass khi chỉ số công tơ được lưu thành công và hiển thị chính xác}
+{Lead: Lê Văn C, Members: Hoàng Văn E}
+{03/01/2026}
+
+\testcase
+{TC-008}
+{Kế toán import chỉ số công tơ từ CSV}
+{Kiểm tra chức năng import hàng loạt chỉ số công tơ từ file CSV}
+{Functional testing - Kiểm thử import dữ liệu}
+{
+1 & Mở tab "Chỉ số công tơ" & Chuẩn bị import & Hiển thị nút "Import từ CSV" & \\
+\hline
+2 & Nhấn "Import từ CSV" & Mở dialog upload & Dialog hiển thị hướng dẫn format CSV & \\
+\hline
+3 & Chọn file CSV hợp lệ & Upload file & File được chấp nhận & \\
+\hline
+4 & Nhấn "Xác nhận import" & Xử lý dữ liệu & Hệ thống xử lý từng dòng trong CSV & \\
+\hline
+5 & Kiểm tra kết quả import & Xác minh dữ liệu & Hiển thị số lượng thành công/thất bại, toast thông báo & \\
+\hline
+6 & Kiểm tra dữ liệu trong bảng & Xác minh hiển thị & Tất cả chỉ số từ CSV xuất hiện trong danh sách & \\
+\hline
+}
+{Test case pass khi import CSV thành công với thông báo chính xác về số lượng}
+{Lead: Lê Văn C, Members: Trần Thị B, Phạm Thị D}
+{03/01/2026}
+
+\testcase
+{TC-009}
+{Kế toán quản lý phí dịch vụ}
+{Kiểm tra chức năng tạo và cập nhật phí dịch vụ}
+{Functional testing - Kiểm thử CRUD}
+{
+1 & Mở tab "Phí dịch vụ" & Truy cập quản lý phí & Hiển thị danh sách phí dịch vụ hiện có & \\
+\hline
+2 & Nhấn "Thêm phí dịch vụ" & Mở dialog tạo mới & Form hiển thị các trường: Tên, đơn giá, đơn vị & \\
+\hline
+3 & Điền thông tin phí mới & Kiểm tra validation & Form validation các trường bắt buộc & \\
+\hline
+4 & Nhấn "Lưu" & Tạo phí mới & Phí được tạo, hiển thị toast thành công & \\
+\hline
+5 & Chỉnh sửa phí vừa tạo & Kiểm tra update & Dialog hiển thị thông tin cũ, cho phép chỉnh sửa & \\
+\hline
+6 & Cập nhật đơn giá & Kiểm tra save & Đơn giá được cập nhật, danh sách refresh & \\
+\hline
+}
+{Test case pass khi có thể tạo, xem, và cập nhật phí dịch vụ thành công}
+{Lead: Hoàng Văn E, Members: Nguyễn Văn A}
+{03/01/2026}
+
+\testcase
+{TC-010}
+{Kế toán tính toán hóa đơn tự động}
+{Kiểm tra chức năng tính toán và tạo hóa đơn tự động cho căn hộ}
+{Functional testing - Kiểm thử tính toán nghiệp vụ}
+{
+1 & Mở tab "Hóa đơn" trong Quản lý kế toán & Truy cập tính hóa đơn & Hiển thị form tính hóa đơn & \\
+\hline
+2 & Chọn tháng/năm để tính & Chọn kỳ tính & Dropdown hiển thị các tháng có thể chọn & \\
+\hline
+3 & Nhấn "Tính toán hóa đơn" & Thực hiện tính toán & Hệ thống tính toán dựa trên chỉ số công tơ và phí dịch vụ & \\
+\hline
+4 & Kiểm tra kết quả & Xác minh logic & Hiển thị số lượng hóa đơn được tạo thành công & \\
+\hline
+5 & Xem chi tiết hóa đơn & Kiểm tra accuracy & Các khoản phí được tính chính xác (điện, nước, phí dịch vụ) & \\
+\hline
+6 & Kiểm tra trong tab Biên lai & Xác minh tích hợp & Hóa đơn mới xuất hiện với trạng thái "Chưa thanh toán" & \\
+\hline
+}
+{Test case pass khi hóa đơn được tính toán chính xác dựa trên công thức nghiệp vụ}
+{Lead: Lê Văn C, Members: Hoàng Văn E, Phạm Thị D}
+{03/01/2026}
+
+\testcase
+{TC-011}
+{Kế toán xử lý thanh toán ngoại tuyến bằng tiền mặt}
+{Kiểm tra chức năng ghi nhận thanh toán tiền mặt cho hóa đơn}
+{Functional testing - Kiểm thử xử lý thanh toán}
+{
+1 & Nhấn vào tab "Thanh toán ngoại tuyến" & Truy cập trang & Hiển thị dropdown tìm căn hộ & \\
+\hline
+2 & Tìm và chọn căn hộ & Lấy dữ liệu hóa đơn & Hiển thị danh sách hóa đơn chưa thanh toán & \\
+\hline
+3 & Kiểm tra thông tin hóa đơn & Xác minh hiển thị & Hiển thị tháng, tổng tiền, chi tiết các khoản phí & \\
+\hline
+4 & Chọn hóa đơn cần thanh toán & Đánh dấu chọn & Checkbox được chọn, tổng tiền được tính & \\
+\hline
+5 & Nhấn "Thanh toán bằng tiền mặt" & Mở dialog xác nhận & Dialog hiển thị tổng tiền cần thu & \\
+\hline
+6 & Xác nhận thanh toán & Xử lý giao dịch & Toast thành công, hóa đơn chuyển sang "Đã thanh toán" & \\
+\hline
+7 & Kiểm tra biên lai & Xác minh tích hợp & Biên lai mới được tạo trong tab "Biên lai thanh toán" & \\
+\hline
+}
+{Test case pass khi thanh toán được ghi nhận chính xác và tạo biên lai tương ứng}
+{Lead: Nguyễn Văn A, Members: Trần Thị B}
+{03/01/2026}
+
+\testcase
+{TC-012}
+{Kế toán tạo QR code thanh toán}
+{Kiểm tra chức năng tạo mã QR cho thanh toán chuyển khoản}
+{Functional testing - Kiểm thử tính năng QR payment}
+{
+1 & Trong tab "Thanh toán ngoại tuyến" & Chọn căn hộ & Hiển thị hóa đơn chưa thanh toán & \\
+\hline
+2 & Chọn hóa đơn cần thanh toán & Đánh dấu & Checkbox được chọn & \\
+\hline
+3 & Nhấn "Tạo QR Code" & Mở dialog QR & Dialog hiển thị thông tin thanh toán & \\
+\hline
+4 & Kiểm tra thông tin QR & Xác minh dữ liệu & Hiển thị: Số tài khoản, số tiền, nội dung chuyển khoản & \\
+\hline
+5 & Kiểm tra mã QR & Xác minh QR code & QR code được tạo và hiển thị chính xác & \\
+\hline
+6 & Nhấn "In QR Code" & Kiểm tra print & Hệ thống mở dialog in với QR code & \\
+\hline
+}
+{Test case pass khi QR code được tạo chính xác với đầy đủ thông tin thanh toán}
+{Lead: Trần Thị B, Members: Lê Văn C}
+{03/01/2026}
+
+\newpage
+\section{Test Cases - Chức năng Quản trị (Admin/Manager)}
+
+\testcase
+{TC-013}
+{Admin quản lý tài khoản người dùng}
+{Kiểm tra chức năng CRUD cho tài khoản người dùng}
+{Functional testing - Kiểm thử quản lý accounts}
+{
+1 & Đăng nhập với tài khoản Admin & Truy cập hệ thống & Dashboard admin được hiển thị & \\
+\hline
+2 & Nhấn vào tab "Tài khoản" & Mở trang quản lý & Hiển thị danh sách tài khoản với bộ lọc theo role & \\
+\hline
+3 & Nhấn "Thêm tài khoản" & Mở dialog tạo mới & Form hiển thị: Username, Password, Role & \\
+\hline
+4 & Điền thông tin và lưu & Tạo tài khoản mới & Toast thành công, tài khoản xuất hiện trong danh sách & \\
+\hline
+5 & Chỉnh sửa tài khoản & Kiểm tra update & Dialog edit hiển thị, cho phép sửa thông tin & \\
+\hline
+6 & Xóa tài khoản & Kiểm tra delete & Dialog xác nhận hiển thị, sau khi xác nhận tài khoản bị xóa & \\
+\hline
+}
+{Test case pass khi tất cả CRUD operations cho accounts hoạt động chính xác}
+{Lead: Hoàng Văn E, Members: Nguyễn Văn A, Phạm Thị D}
+{03/01/2026}
+
+\testcase
+{TC-014}
+{Admin quản lý cư dân}
+{Kiểm tra chức năng CRUD cho thông tin cư dân}
+{Functional testing - Kiểm thử quản lý residents}
+{
+1 & Nhấn vào tab "Cư dân" & Mở trang quản lý & Hiển thị danh sách cư dân với thông tin cơ bản & \\
+\hline
+2 & Tìm kiếm cư dân theo tên & Kiểm tra search & Danh sách được lọc theo từ khóa & \\
+\hline
+3 & Nhấn "Thêm cư dân" & Mở dialog tạo mới & Form hiển thị: Tên, CCCD, SĐT, Email, Căn hộ & \\
+\hline
+4 & Điền thông tin hợp lệ & Kiểm tra validation & Form validation đúng format (phone, email, CCCD) & \\
+\hline
+5 & Lưu cư dân mới & Tạo bản ghi & Toast thành công, cư dân xuất hiện trong danh sách & \\
+\hline
+6 & Xem chi tiết cư dân & Kiểm tra view & Dialog hiển thị đầy đủ thông tin cư dân & \\
+\hline
+7 & Cập nhật và xóa & Kiểm tra CRUD & Update và delete hoạt động với confirmation dialog & \\
+\hline
+}
+{Test case pass khi có thể quản lý thông tin cư dân với validation chính xác}
+{Lead: Phạm Thị D, Members: Lê Văn C}
+{03/01/2026}
+
+\testcase
+{TC-015}
+{Admin quản lý căn hộ}
+{Kiểm tra chức năng CRUD cho thông tin căn hộ}
+{Functional testing - Kiểm thử quản lý apartments}
+{
+1 & Nhấn vào tab "Căn hộ" & Mở trang quản lý & Hiển thị danh sách căn hộ với lọc theo tòa nhà & \\
+\hline
+2 & Lọc theo tòa nhà & Kiểm tra filter & Danh sách chỉ hiển thị căn hộ của tòa đã chọn & \\
+\hline
+3 & Nhấn "Thêm căn hộ" & Mở dialog tạo & Form hiển thị: Mã căn hộ, Tầng, Diện tích, Tòa nhà & \\
+\hline
+4 & Nhập mã căn hộ trùng & Kiểm tra validation & Hiển thị lỗi "Mã căn hộ đã tồn tại" & \\
+\hline
+5 & Nhập mã căn hộ mới & Tạo căn hộ & Toast thành công, căn hộ được thêm vào danh sách & \\
+\hline
+6 & Chỉnh sửa thông tin căn hộ & Kiểm tra update & Cập nhật thành công với toast notification & \\
+\hline
+7 & Xóa căn hộ chưa có cư dân & Kiểm tra delete & Xóa thành công với confirmation & \\
+\hline
+}
+{Test case pass khi quản lý căn hộ hoạt động với validation và constraints chính xác}
+{Lead: Nguyễn Văn A, Members: Hoàng Văn E}
+{03/01/2026}
+
+\testcase
+{TC-016}
+{Manager quản lý kế toán}
+{Kiểm tra chức năng CRUD cho tài khoản kế toán}
+{Functional testing - Kiểm thử quản lý accountants}
+{
+1 & Đăng nhập với tài khoản Manager & Truy cập hệ thống & Dashboard manager được hiển thị & \\
+\hline
+2 & Nhấn vào tab "Kế toán" & Mở trang quản lý & Hiển thị danh sách kế toán & \\
+\hline
+3 & Nhấn "Thêm kế toán" & Mở dialog tạo & Form hiển thị thông tin cơ bản của kế toán & \\
+\hline
+4 & Điền thông tin và lưu & Tạo bản ghi mới & Kế toán mới được tạo với tài khoản tương ứng & \\
+\hline
+5 & Kiểm tra trong tab "Tài khoản" & Xác minh tích hợp & Tài khoản với role Accountant được tạo tự động & \\
+\hline
+6 & Cập nhật thông tin kế toán & Kiểm tra update & Thông tin được cập nhật chính xác & \\
+\hline
+}
+{Test case pass khi quản lý kế toán hoạt động với liên kết accounts đúng}
+{Lead: Lê Văn C, Members: Trần Thị B, Phạm Thị D}
+{03/01/2026}
+
+\newpage
+\section{Test Cases - Tích hợp và Bảo mật}
+
+\testcase
+{TC-017}
+{Kiểm tra token expiration và refresh}
+{Xác minh xử lý khi token hết hạn}
+{Security testing - Kiểm thử session management}
+{
+1 & Đăng nhập vào hệ thống & Tạo session & Token được lưu trong localStorage & \\
+\hline
+2 & Chờ token hết hạn (mock) & Kiểm tra expiration & Token hết hiệu lực & \\
+\hline
+3 & Thực hiện một API call & Kiểm tra xử lý & Hệ thống phát hiện token invalid & \\
+\hline
+4 & Kiểm tra redirect & Xác minh hành vi & User được redirect về trang login & \\
+\hline
+5 & Kiểm tra thông báo & Xác minh UX & Toast hiển thị "Phiên đăng nhập hết hạn" & \\
+\hline
+}
+{Test case pass khi hệ thống xử lý token expiration một cách graceful}
+{Lead: Hoàng Văn E, Members: Nguyễn Văn A}
+{03/01/2026}
+
+\testcase
+{TC-018}
+{Kiểm tra CORS và API security}
+{Xác minh cấu hình bảo mật API}
+{Security testing - Kiểm thử API security}
+{
+1 & Gọi API từ domain không được phép & Kiểm tra CORS & Request bị từ chối với CORS error & \\
+\hline
+2 & Gọi API không có token & Kiểm tra authentication & Response 401 Unauthorized & \\
+\hline
+3 & Gọi API với token giả mạo & Kiểm tra validation & Response 401 Unauthorized & \\
+\hline
+4 & Gọi API với token hợp lệ nhưng sai role & Kiểm tra authorization & Response 403 Forbidden & \\
+\hline
+5 & Gọi API với token và role đúng & Kiểm tra success case & Response 200 OK với dữ liệu chính xác & \\
+\hline
+}
+{Test case pass khi tất cả các cơ chế bảo mật API hoạt động đúng}
+{Lead: Nguyễn Văn A, Members: Hoàng Văn E, Lê Văn C}
+{03/01/2026}
+
+\testcase
+{TC-019}
+{Kiểm tra tính toán hóa đơn end-to-end}
+{Kiểm tra toàn bộ flow từ nhập chỉ số đến tạo hóa đơn}
+{Integration testing - Kiểm thử tích hợp}
+{
+1 & Kế toán nhập chỉ số công tơ & Tạo dữ liệu đầu vào & Chỉ số điện/nước được lưu cho căn hộ A & \\
+\hline
+2 & Kế toán tạo/cập nhật phí dịch vụ & Thiết lập đơn giá & Đơn giá điện, nước, và phí khác được cấu hình & \\
+\hline
+3 & Kế toán chạy tính hóa đơn & Thực hiện tính toán & Hệ thống tính: (chỉ số mới - chỉ số cũ) × đơn giá & \\
+\hline
+4 & Kiểm tra hóa đơn được tạo & Xác minh kết quả & Hóa đơn hiển thị với tổng tiền chính xác & \\
+\hline
+5 & Cư dân đăng nhập và xem hóa đơn & Kiểm tra hiển thị & Cư dân A thấy hóa đơn mới trong tab "Hóa đơn" & \\
+\hline
+6 & Kế toán xử lý thanh toán & Hoàn tất flow & Hóa đơn chuyển sang "Đã thanh toán", biên lai được tạo & \\
+\hline
+7 & Cư dân xem lịch sử thanh toán & Xác minh end-to-end & Giao dịch xuất hiện trong tab "Thanh toán" & \\
+\hline
+}
+{Test case pass khi toàn bộ flow hoạt động liền mạch từ đầu đến cuối}
+{Lead: Lê Văn C, Members: Tất cả members}
+{03/01/2026}
+
+\newpage
+\section{Test Cases - Giao diện và Trải nghiệm Người dùng}
+
+\testcase
+{TC-020}
+{Kiểm tra responsive design}
+{Xác minh giao diện hoạt động tốt trên nhiều kích thước màn hình}
+{UI/UX testing - Kiểm thử responsive}
+{
+1 & Mở ứng dụng trên desktop (1920×1080) & Kiểm tra layout & Giao diện hiển thị đầy đủ, sidebar và content cân đối & \\
+\hline
+2 & Thu nhỏ browser xuống tablet (768px) & Kiểm tra breakpoint & Layout điều chỉnh, grid columns thay đổi phù hợp & \\
+\hline
+3 & Mở trên mobile (375px) & Kiểm tra mobile view & Cards và tables responsive, không bị overflow & \\
+\hline
+4 & Kiểm tra các dialog/modal & Xác minh responsive & Dialog hiển thị tốt trên mọi kích thước & \\
+\hline
+5 & Kiểm tra navigation & Xác minh usability & Sidebar có thể collapse trên mobile & \\
+\hline
+}
+{Test case pass khi giao diện hoạt động tốt trên desktop, tablet, và mobile}
+{Lead: Trần Thị B, Members: Phạm Thị D}
+{03/01/2026}
+
+\testcase
+{TC-021}
+{Kiểm tra color scheme và accessibility}
+{Xác minh màu sắc và khả năng tiếp cận}
+{UI/UX testing - Kiểm thử accessibility}
+{
+1 & Kiểm tra color contrast & Đảm bảo readability & Tất cả text có contrast ratio >= 4.5:1 & \\
+\hline
+2 & Kiểm tra blue gradient & Xác minh brand & Gradient xanh xuất hiện nhất quán trên headers, cards & \\
+\hline
+3 & Kiểm tra trạng thái interactive & Xác minh feedback & Buttons có hover, active, disabled states rõ ràng & \\
+\hline
+4 & Kiểm tra color coding & Xác minh logic & Đỏ=chưa thanh toán, xanh=đã thanh toán, cam=pending & \\
+\hline
+5 & Navigation bằng keyboard & Kiểm tra accessibility & Tab order hợp lý, focus visible rõ ràng & \\
+\hline
+}
+{Test case pass khi color scheme nhất quán và đáp ứng tiêu chuẩn accessibility}
+{Lead: Phạm Thị D, Members: Trần Thị B}
+{03/01/2026}
+
+\testcase
+{TC-022}
+{Kiểm tra loading states và error handling}
+{Xác minh hiển thị loading và xử lý lỗi}
+{UI/UX testing - Kiểm thử user feedback}
+{
+1 & Thực hiện API call & Kiểm tra loading & Spinner hoặc skeleton loader hiển thị & \\
+\hline
+2 & Mô phỏng slow network & Kiểm tra timeout & Loading indicator vẫn hiển thị, không bị treo & \\
+\hline
+3 & Mô phỏng API error & Kiểm tra error state & Toast error hiển thị với message rõ ràng & \\
+\hline
+4 & Mô phỏng network offline & Kiểm tra offline mode & Thông báo "Không có kết nối mạng" & \\
+\hline
+5 & Kiểm tra empty states & Xác minh UX & Empty state với icon và message thân thiện & \\
+\hline
+}
+{Test case pass khi tất cả loading và error states được xử lý tốt}
+{Lead: Nguyễn Văn A, Members: Lê Văn C}
+{03/01/2026}
+
+\testcase
+{TC-023}
+{Kiểm tra toast notifications}
+{Xác minh hệ thống thông báo ngắn hạn}
+{UI/UX testing - Kiểm thử notifications}
+{
+1 & Thực hiện thao tác thành công & Kiểm tra success toast & Toast màu xanh với icon check hiển thị & \\
+\hline
+2 & Thực hiện thao tác thất bại & Kiểm tra error toast & Toast màu đỏ với icon X hiển thị & \\
+\hline
+3 & Kiểm tra vị trí hiển thị & Xác minh placement & Toast hiển thị ở góc phù hợp, không che nội dung & \\
+\hline
+4 & Kiểm tra auto-dismiss & Xác minh timing & Toast tự động ẩn sau 3-5 giây & \\
+\hline
+5 & Kiểm tra multiple toasts & Xác minh stacking & Nhiều toast xếp chồng không chồng lấn & \\
+\hline
+}
+{Test case pass khi toast notifications hiển thị rõ ràng và không gây phiền toái}
+{Lead: Trần Thị B, Members: Phạm Thị D}
+{03/01/2026}
+
+\newpage
+\section{Test Cases - Performance và Scalability}
+
+\testcase
+{TC-024}
+{Kiểm tra performance với dữ liệu lớn}
+{Xác minh hiệu năng khi xử lý nhiều bản ghi}
+{Performance testing - Kiểm thử hiệu năng}
+{
+1 & Load danh sách 1000 căn hộ & Kiểm tra rendering & Danh sách hiển thị mượt mà trong < 2 giây & \\
+\hline
+2 & Tìm kiếm trong danh sách lớn & Kiểm tra search performance & Kết quả hiển thị ngay lập tức (< 500ms) & \\
+\hline
+3 & Lọc và sắp xếp dữ liệu lớn & Kiểm tra filtering & Filter/sort hoạt động nhanh, không lag & \\
+\hline
+4 & Pagination với nhiều trang & Kiểm tra pagination & Chuyển trang mượt mà, không bị chậm & \\
+\hline
+5 & Load nhiều tab cùng lúc & Kiểm tra memory & Không bị memory leak khi switch tabs & \\
+\hline
+}
+{Test case pass khi ứng dụng hoạt động mượt mà với dữ liệu lớn}
+{Lead: Hoàng Văn E, Members: Nguyễn Văn A}
+{03/01/2026}
+
+\testcase
+{TC-025}
+{Kiểm tra concurrent users}
+{Xác minh hệ thống xử lý nhiều người dùng cùng lúc}
+{Performance testing - Kiểm thử đồng thời}
+{
+1 & 10 users đăng nhập cùng lúc & Kiểm tra auth load & Tất cả users đăng nhập thành công & \\
+\hline
+2 & Multiple users cập nhật dữ liệu & Kiểm tra race condition & Không có data conflict, version control hoạt động & \\
+\hline
+3 & Concurrent payment processing & Kiểm tra transaction & Mỗi payment được xử lý đúng, không bị duplicate & \\
+\hline
+4 & Nhiều users import CSV & Kiểm tra queue & Các import được xử lý tuần tự hoặc parallel an toàn & \\
+\hline
+}
+{Test case pass khi hệ thống xử lý concurrent operations chính xác}
+{Lead: Lê Văn C, Members: Hoàng Văn E}
+{03/01/2026}
+
+\newpage
+\section{Kết luận}
+
+\subsection{Tổng kết}
+Tài liệu này đã mô tả 25 test cases quan trọng cho hệ thống BlueMoon, bao gồm:
+\begin{itemize}
+    \item 3 test cases về xác thực và phân quyền
+    \item 3 test cases về chức năng cư dân
+    \item 6 test cases về chức năng kế toán
+    \item 4 test cases về chức năng quản trị
+    \item 3 test cases về tích hợp và bảo mật
+    \item 4 test cases về giao diện và trải nghiệm người dùng
+    \item 2 test cases về hiệu năng
+\end{itemize}
+
+\subsection{Tiêu chí Pass/Fail}
+\begin{itemize}
+    \item \textbf{Pass}: Tất cả các bước thực hiện đúng kết quả mong đợi
+    \item \textbf{Failed}: Bất kỳ bước nào không đạt kết quả mong đợi
+    \item \textbf{Pending}: Test case chưa được thực hiện
+\end{itemize}
+
+\subsection{Môi trường kiểm thử}
+\begin{itemize}
+    \item \textbf{Frontend}: React 18 + TypeScript + Tailwind CSS
+    \item \textbf{Backend}: Python FastAPI
+    \item \textbf{Database}: PostgreSQL
+    \item \textbf{Browsers}: Chrome (latest), Firefox (latest), Safari (latest)
+    \item \textbf{Devices}: Desktop (1920×1080), Tablet (768×1024), Mobile (375×667)
+\end{itemize}
+
+\subsection{Lịch trình kiểm thử}
+\begin{itemize}
+    \item \textbf{Phase 1} (Week 1): Test cases TC-001 đến TC-008
+    \item \textbf{Phase 2} (Week 2): Test cases TC-009 đến TC-016
+    \item \textbf{Phase 3} (Week 3): Test cases TC-017 đến TC-025
+    \item \textbf{Regression testing}: Thực hiện sau mỗi sprint
+\end{itemize}
+
+\subsection{Định nghĩa vai trò trong nhóm kiểm thử}
+\begin{itemize}
+    \item \textbf{Nguyễn Văn A}: Test Lead - Chịu trách nhiệm authentication, authorization, resident features
+    \item \textbf{Trần Thị B}: Tester - Chịu trách nhiệm UI/UX testing, notifications
+    \item \textbf{Lê Văn C}: Tester - Chịu trách nhiệm accountant features, integration testing
+    \item \textbf{Phạm Thị D}: Tester - Chịu trách nhiệm admin features, accessibility
+    \item \textbf{Hoàng Văn E}: Tester - Chịu trách nhiệm performance testing, security
+\end{itemize}
+
+\subsection{Tài liệu tham khảo}
+\begin{itemize}
+    \item GitHub Repository: \texttt{https://github.com/kevin715855/BlueMoon}
+    \item API Documentation: Backend FastAPI docs
+    \item Frontend Components: React TypeScript implementation
+    \item Test Data: Sample data trong database test
+\end{itemize}
+
+\end{document}
