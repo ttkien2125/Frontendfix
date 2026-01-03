@@ -28,7 +28,7 @@ export function Sidebar({ role, activeTab, onTabChange, onLogout }: SidebarProps
     }
 
     // Accountant-specific menu
-    if (Permissions.canManageOfflinePayments(userRole) && userRole === "Accountant") {
+    if (Permissions.canManageOfflinePayments(userRole)) {
       items.push({ id: "offline-payments", label: "Thanh toán ngoại tuyến", icon: CreditCard });
     }
 

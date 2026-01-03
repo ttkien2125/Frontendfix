@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -6,9 +6,10 @@ import { Label } from "../ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
 import { ShieldAlert, Search, CreditCard, QrCode, Wallet, Building2 } from "lucide-react";
 import { Badge } from "../ui/badge";
-import { api, Bill, QRCodeResponse, Resident } from "../../services/api";
+import { api, Bill, QRCodeResponse, Resident, Apartment } from "../../services/api";
 import { Permissions, UserRole } from "../../utils/permissions";
 import { toast } from "sonner@2.0.3";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 interface OfflinePaymentsTabProps {
   role: string;
@@ -32,6 +33,9 @@ export function OfflinePaymentsTab({ role }: OfflinePaymentsTabProps) {
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [processingPayment, setProcessingPayment] = useState(false);
 
+  // Apartment list state
+  const [apartments, setApartments] = useState<Apartment[]>([]);
+
   if (!canAccess) {
     return (
       <Card className="shadow-lg">
@@ -45,6 +49,19 @@ export function OfflinePaymentsTab({ role }: OfflinePaymentsTabProps) {
       </Card>
     );
   }
+
+  useEffect(() => {
+    const fetchApartments = async () => {
+      try {
+        const apartments = await api.apartments.getAll();
+        setApartments(apartments);
+      } catch (error: any) {
+        toast.error(error.message || "Không thể tải danh sách căn hộ");
+      }
+    };
+
+    fetchApartments();
+  }, []);
 
   const handleSearchBills = async () => {
     if (!apartmentId.trim()) {
@@ -183,19 +200,23 @@ export function OfflinePaymentsTab({ role }: OfflinePaymentsTabProps) {
               <Label htmlFor="apartmentId" className="text-gray-700 mb-2 block">
                 Mã căn hộ
               </Label>
-              <Input
+              <Select
                 id="apartmentId"
-                type="text"
-                placeholder="Nhập mã căn hộ (VD: A101, B205)"
                 value={apartmentId}
-                onChange={(e) => setApartmentId(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleSearchBills();
-                  }
-                }}
+                onValueChange={(value) => setApartmentId(value)}
                 className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-              />
+              >
+                <SelectTrigger className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                  <SelectValue placeholder="Nhập mã căn hộ (VD: A101, B205)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {apartments.map((apartment) => (
+                    <SelectItem key={apartment.apartmentID} value={apartment.apartmentID}>
+                      {apartment.apartmentID}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex items-end">
               <Button
