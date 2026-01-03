@@ -58,4 +58,9 @@ export const Permissions = {
   canViewReceipts: (role: UserRole): boolean => {
     return role === "Accountant" || role === "Admin";
   },
+
+  // Accounting - Only Accountant and Admin
+  canManageAccounting: (role: UserRole): boolean => {
+    return role === "Accountant" || role === "Admin";
+  },
 };

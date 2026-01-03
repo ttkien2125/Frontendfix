@@ -1,4 +1,4 @@
-import { Home, FileText, CreditCard, Building, Users, UserCog, ClipboardList, LogOut, Receipt, Building2 } from "lucide-react";
+import { Home, FileText, CreditCard, Building, Users, UserCog, ClipboardList, LogOut, Receipt, Building2, Calculator } from "lucide-react";
 import { Button } from "../ui/button";
 import { Permissions, UserRole } from "../../utils/permissions";
 
@@ -30,6 +30,11 @@ export function Sidebar({ role, activeTab, onTabChange, onLogout }: SidebarProps
     // Accountant-specific menu
     if (Permissions.canManageOfflinePayments(userRole)) {
       items.push({ id: "offline-payments", label: "Thanh toán ngoại tuyến", icon: CreditCard });
+    }
+
+    // Accounting - For Accountant and Admin
+    if (Permissions.canManageAccounting(userRole)) {
+      items.push({ id: "accounting", label: "Quản lý kế toán", icon: Calculator });
     }
 
     // Receipts - For Accountant and Admin
