@@ -259,6 +259,27 @@ export interface MeterReadingCreate {
   newWater: number;
 }
 
+export interface MeterReading {
+  readingID: number;
+  apartmentID: string;
+  month: number;
+  year: number;
+  oldElectricity: number;
+  newElectricity: number;
+  oldWater: number;
+  newWater: number;
+  recordDate: string;
+}
+
+export interface ServiceFee {
+  feeID: number;
+  buildingID: string;
+  typeOfBill: string;
+  feePerUnit?: number | null;
+  flatFee?: number | null;
+  effectiveDate: string;
+}
+
 export interface ServiceFeeCreate {
   buildingID: string;
   typeOfBill: string;
@@ -272,6 +293,109 @@ export interface CalculateBillsRequest {
   year: number;
   deadline_day?: number;
   overwrite?: boolean;
+}
+
+// Statistics Types
+export interface DashboardStats {
+  totalApartments: number;
+  totalResidents: number;
+  occupiedApartments: number;
+  vacantApartments: number;
+  totalBills: number;
+  paidBills: number;
+  unpaidBills: number;
+  totalRevenue: number;
+  pendingPayments: number;
+}
+
+export interface BuildingStats {
+  buildingID: string;
+  totalApartments: number;
+  occupiedApartments: number;
+  totalResidents: number;
+  monthlyRevenue: number;
+  unpaidBills: number;
+}
+
+export interface RevenueReport {
+  month: number;
+  year: number;
+  totalRevenue: number;
+  totalPaid: number;
+  totalUnpaid: number;
+  billsCount: number;
+}
+
+// Maintenance Request Types
+export interface MaintenanceRequest {
+  requestID: number;
+  residentID: number;
+  apartmentID: string;
+  category: string;
+  description: string;
+  status: "Pending" | "In Progress" | "Completed" | "Cancelled";
+  priority: "Low" | "Medium" | "High" | "Urgent";
+  createdDate: string;
+  completedDate?: string | null;
+  assignedTo?: string | null;
+  residentName?: string;
+  phoneNumber?: string;
+}
+
+export interface MaintenanceRequestCreate {
+  apartmentID: string;
+  category: string;
+  description: string;
+  priority?: "Low" | "Medium" | "High" | "Urgent";
+}
+
+export interface MaintenanceRequestUpdate {
+  status?: "Pending" | "In Progress" | "Completed" | "Cancelled";
+  assignedTo?: string | null;
+  priority?: "Low" | "Medium" | "High" | "Urgent";
+}
+
+// Announcement Types
+export interface Announcement {
+  announcementID: number;
+  title: string;
+  content: string;
+  category: string;
+  priority: "Normal" | "Important" | "Urgent";
+  createdBy: string;
+  createdDate: string;
+  expiryDate?: string | null;
+  targetBuilding?: string | null;
+  isActive: boolean;
+}
+
+export interface AnnouncementCreate {
+  title: string;
+  content: string;
+  category: string;
+  priority: "Normal" | "Important" | "Urgent";
+  expiryDate?: string | null;
+  targetBuilding?: string | null;
+}
+
+// Document Types
+export interface Document {
+  documentID: number;
+  title: string;
+  description?: string;
+  category: string;
+  fileUrl: string;
+  uploadedBy: string;
+  uploadDate: string;
+  isPublic: boolean;
+}
+
+export interface DocumentCreate {
+  title: string;
+  description?: string;
+  category: string;
+  fileUrl: string;
+  isPublic: boolean;
 }
 
 // ==================== API ERROR CLASS ====================
@@ -690,6 +814,13 @@ export const api = {
       });
     },
 
+    // Mark all notifications as read
+    markAllAsRead: async (): Promise<{ message: string; count: number }> => {
+      return fetchApi<{ message: string; count: number }>("/api/notification/mark-all-read", {
+        method: "PUT",
+      });
+    },
+
     // Get unread count
     getUnreadCount: async (): Promise<{ count: number }> => {
       return fetchApi<{ count: number }>("/api/notification/unread-count", {
@@ -724,6 +855,14 @@ export const api = {
       });
     },
 
+    // Create manual bill
+    createManualBill: async (data: BillCreate): Promise<{ message: string; bill: Bill }> => {
+      return fetchApi<{ message: string; bill: Bill }>("/api/accounting/bills/manual", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+
     // Calculate monthly bills
     calculateBills: async (
       data: CalculateBillsRequest
@@ -753,6 +892,167 @@ export const api = {
 
       return fetchApi<Bill[]>(endpoint, {
         method: "GET",
+      });
+    },
+  },
+
+  // ==================== STATISTICS ====================
+  statistics: {
+    // Get dashboard stats
+    getDashboardStats: async (): Promise<DashboardStats> => {
+      return fetchApi<DashboardStats>("/api/statistics/dashboard", {
+        method: "GET",
+      });
+    },
+
+    // Get building stats
+    getBuildingStats: async (buildingId: string): Promise<BuildingStats> => {
+      return fetchApi<BuildingStats>(`/api/statistics/building/${buildingId}`, {
+        method: "GET",
+      });
+    },
+
+    // Get revenue report
+    getRevenueReport: async (
+      month: number,
+      year: number
+    ): Promise<RevenueReport> => {
+      return fetchApi<RevenueReport>(
+        `/api/statistics/revenue?month=${month}&year=${year}`,
+        {
+          method: "GET",
+        }
+      );
+    },
+  },
+
+  // ==================== MAINTENANCE REQUESTS ====================
+  maintenanceRequests: {
+    // Get all maintenance requests
+    getAll: async (): Promise<MaintenanceRequest[]> => {
+      return fetchApi<MaintenanceRequest[]>("/api/maintenance-requests/", {
+        method: "GET",
+      });
+    },
+
+    // Get maintenance request by ID
+    get: async (id: number): Promise<MaintenanceRequest> => {
+      return fetchApi<MaintenanceRequest>(`/api/maintenance-requests/${id}`, {
+        method: "GET",
+      });
+    },
+
+    // Create a new maintenance request
+    create: async (
+      request: MaintenanceRequestCreate
+    ): Promise<MaintenanceRequest> => {
+      return fetchApi<MaintenanceRequest>("/api/maintenance-requests/", {
+        method: "POST",
+        body: JSON.stringify(request),
+      });
+    },
+
+    // Update a maintenance request
+    update: async (
+      id: number,
+      request: MaintenanceRequestUpdate
+    ): Promise<MaintenanceRequest> => {
+      return fetchApi<MaintenanceRequest>(`/api/maintenance-requests/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(request),
+      });
+    },
+
+    // Delete a maintenance request
+    delete: async (id: number): Promise<void> => {
+      return fetchApi<void>(`/api/maintenance-requests/${id}`, {
+        method: "DELETE",
+      });
+    },
+  },
+
+  // ==================== ANNOUNCEMENTS ====================
+  announcements: {
+    // Get all announcements
+    getAll: async (): Promise<Announcement[]> => {
+      return fetchApi<Announcement[]>("/api/announcements/", {
+        method: "GET",
+      });
+    },
+
+    // Get announcement by ID
+    get: async (id: number): Promise<Announcement> => {
+      return fetchApi<Announcement>(`/api/announcements/${id}`, {
+        method: "GET",
+      });
+    },
+
+    // Create a new announcement
+    create: async (announcement: AnnouncementCreate): Promise<Announcement> => {
+      return fetchApi<Announcement>("/api/announcements/", {
+        method: "POST",
+        body: JSON.stringify(announcement),
+      });
+    },
+
+    // Update an announcement
+    update: async (
+      id: number,
+      announcement: AnnouncementCreate
+    ): Promise<Announcement> => {
+      return fetchApi<Announcement>(`/api/announcements/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(announcement),
+      });
+    },
+
+    // Delete an announcement
+    delete: async (id: number): Promise<void> => {
+      return fetchApi<void>(`/api/announcements/${id}`, {
+        method: "DELETE",
+      });
+    },
+  },
+
+  // ==================== DOCUMENTS ====================
+  documents: {
+    // Get all documents
+    getAll: async (): Promise<Document[]> => {
+      return fetchApi<Document[]>("/api/documents/", {
+        method: "GET",
+      });
+    },
+
+    // Get document by ID
+    get: async (id: number): Promise<Document> => {
+      return fetchApi<Document>(`/api/documents/${id}`, {
+        method: "GET",
+      });
+    },
+
+    // Create a new document
+    create: async (document: DocumentCreate): Promise<Document> => {
+      return fetchApi<Document>("/api/documents/", {
+        method: "POST",
+        body: JSON.stringify(document),
+      });
+    },
+
+    // Update a document
+    update: async (
+      id: number,
+      document: DocumentCreate
+    ): Promise<Document> => {
+      return fetchApi<Document>(`/api/documents/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(document),
+      });
+    },
+
+    // Delete a document
+    delete: async (id: number): Promise<void> => {
+      return fetchApi<void>(`/api/documents/${id}`, {
+        method: "DELETE",
       });
     },
   },

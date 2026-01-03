@@ -4,10 +4,10 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
-import { ShieldAlert, FileUp, FileEdit, DollarSign, Calculator, Plus, Upload } from "lucide-react";
+import { ShieldAlert, FileUp, FileEdit, DollarSign, Calculator, Plus, Upload, Receipt } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { api, MeterReadingCreate, ServiceFeeCreate, CalculateBillsRequest, Apartment, Building } from "../../services/api";
+import { api, MeterReadingCreate, ServiceFeeCreate, CalculateBillsRequest, Apartment, Building, BillCreate, Accountant } from "../../services/api";
 import { Permissions, UserRole } from "../../utils/permissions";
 import { toast } from "sonner@2.0.3";
 import { useEffect } from "react";
@@ -48,6 +48,19 @@ export function AccountingTab({ role }: AccountingTabProps) {
   const [otherBillType, setOtherBillType] = useState("");
   const [processingServiceFee, setProcessingServiceFee] = useState(false);
 
+  // Manual Bill state
+  const [showManualBillModal, setShowManualBillModal] = useState(false);
+  const [accountants, setAccountants] = useState<Accountant[]>([]);
+  const [manualBill, setManualBill] = useState<BillCreate>({
+    apartmentID: "",
+    accountantID: 0,
+    deadline: "",
+    typeOfBill: "Electricity",
+    amount: 0,
+    total: 0,
+  });
+  const [processingManualBill, setProcessingManualBill] = useState(false);
+
   // Calculate Bills state
   const [showCalculateModal, setShowCalculateModal] = useState(false);
   const [calculateRequest, setCalculateRequest] = useState<CalculateBillsRequest>({
@@ -77,8 +90,18 @@ export function AccountingTab({ role }: AccountingTabProps) {
       }
     };
 
+    const fetchAccountants = async () => {
+      try {
+        const accountants = await api.accountants.getAll();
+        setAccountants(accountants);
+      } catch (error: any) {
+        toast.error(error.message || "Không thể tải danh sách kế toán");
+      }
+    };
+
     fetchApartments();
     fetchBuildings();
+    fetchAccountants();
   }, []);
 
   if (!canAccess) {
@@ -233,6 +256,35 @@ export function AccountingTab({ role }: AccountingTabProps) {
     }
   };
 
+  // ==================== Manual Bill Handlers ====================
+  const handleManualBillSubmit = async () => {
+    if (!manualBill.apartmentID || !manualBill.accountantID || !manualBill.deadline || !manualBill.typeOfBill || manualBill.amount <= 0 || manualBill.total <= 0) {
+      toast.error("Vui lòng điền đầy đủ thông tin");
+      return;
+    }
+
+    setProcessingManualBill(true);
+    try {
+      await api.accounting.createManualBill(manualBill);
+      toast.success("Đã tạo hóa đơn thành công");
+      
+      // Reset form
+      setManualBill({
+        apartmentID: "",
+        accountantID: 0,
+        deadline: "",
+        typeOfBill: "Electricity",
+        amount: 0,
+        total: 0,
+      });
+      setShowManualBillModal(false);
+    } catch (error: any) {
+      toast.error(error.message || "Không thể tạo hóa đơn");
+    } finally {
+      setProcessingManualBill(false);
+    }
+  };
+
   // ==================== Calculate Bills Handlers ====================
   const handleCalculateBills = async () => {
     setProcessingCalculation(true);
@@ -303,6 +355,30 @@ export function AccountingTab({ role }: AccountingTabProps) {
             >
               <Plus className="w-5 h-5 mr-2" />
               Thêm phí dịch vụ
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Manual Bill Card */}
+        <Card className="shadow-lg border-red-200 hover:shadow-xl transition-shadow">
+          <CardHeader className="bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-t-lg">
+            <div className="flex items-center gap-3">
+              <div className="bg-white rounded-full p-3">
+                <Receipt className="w-6 h-6 text-red-600" />
+              </div>
+              <CardTitle className="text-white">Hóa đơn thủ công</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <p className="text-gray-600 mb-6 min-h-[48px]">
+              Tạo hóa đơn thủ công cho các căn hộ
+            </p>
+            <Button
+              onClick={() => setShowManualBillModal(true)}
+              className="w-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Tạo hóa đơn
             </Button>
           </CardContent>
         </Card>
@@ -458,7 +534,7 @@ export function AccountingTab({ role }: AccountingTabProps) {
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Ch��n căn hộ" />
+                        <SelectValue placeholder="Chn căn hộ" />
                       </SelectTrigger>
                       <SelectContent>
                         {apartments.map((apartment) => (
@@ -822,6 +898,253 @@ export function AccountingTab({ role }: AccountingTabProps) {
                   </>
                 ) : (
                   "Lưu phí dịch vụ"
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manual Bill Modal */}
+      <Dialog open={showManualBillModal} onOpenChange={setShowManualBillModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-center text-red-900 text-2xl">
+              Tạo hóa đơn thủ công
+            </DialogTitle>
+            <DialogDescription className="text-center text-gray-500">
+              Nhập thông tin hóa đơn thủ công cho căn hộ
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="p-6 space-y-4">
+            <div>
+              <Label htmlFor="apartmentID" className="text-gray-700 mb-2 block">
+                Căn hộ *
+              </Label>
+              <Select
+                value={manualBill.apartmentID}
+                onValueChange={(value) =>
+                  setManualBill({ ...manualBill, apartmentID: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn căn hộ" />
+                </SelectTrigger>
+                <SelectContent>
+                  {apartments.map((apartment) => (
+                    <SelectItem key={apartment.apartmentID} value={apartment.apartmentID}>
+                      {apartment.apartmentID}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="accountantID" className="text-gray-700 mb-2 block">
+                Kế toán *
+              </Label>
+              <Select
+                value={manualBill.accountantID.toString()}
+                onValueChange={(value) =>
+                  setManualBill({ ...manualBill, accountantID: parseInt(value) })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn kế toán" />
+                </SelectTrigger>
+                <SelectContent>
+                  {accountants.map((accountant) => (
+                    <SelectItem key={accountant.accountantID} value={accountant.accountantID.toString()}>
+                      {accountant.fullName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="deadline" className="text-gray-700 mb-2 block">
+                Ngày hạn thanh toán *
+              </Label>
+              <Input
+                id="deadline"
+                type="date"
+                value={manualBill.deadline}
+                onChange={(e) =>
+                  setManualBill({ ...manualBill, deadline: e.target.value })
+                }
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="typeOfBill" className="text-gray-700 mb-2 block">
+                Loại phí *
+              </Label>
+              <Select
+                value={manualBill.typeOfBill}
+                onValueChange={(value) => {
+                  setManualBill({ ...manualBill, typeOfBill: value });
+                  // Reset fee fields when changing type
+                  if (value === "Electricity" || value === "Water") {
+                    setManualBill(prev => ({ ...prev, typeOfBill: value, total: 0 }));
+                  } else if (value === "Management" || value === "Parking" || value === "Internet") {
+                    setManualBill(prev => ({ ...prev, typeOfBill: value, amount: 0 }));
+                  }
+                  // For "Other", keep both options available
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Electricity">Điện (Electricity)</SelectItem>
+                  <SelectItem value="Water">Nước (Water)</SelectItem>
+                  <SelectItem value="Management">Quản lý (Management)</SelectItem>
+                  <SelectItem value="Parking">Gửi xe (Parking)</SelectItem>
+                  <SelectItem value="Internet">Internet</SelectItem>
+                  <SelectItem value="Other">Khác (Other)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Show custom bill type input when "Other" is selected */}
+            {manualBill.typeOfBill === "Other" && (
+              <div>
+                <Label htmlFor="otherBillType" className="text-gray-700 mb-2 block">
+                  Tên loại phí *
+                </Label>
+                <Input
+                  id="otherBillType"
+                  type="text"
+                  placeholder="VD: Phí bảo trì thang máy, Phí vệ sinh..."
+                  value={otherBillType}
+                  onChange={(e) => setOtherBillType(e.target.value)}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Nhập tên cụ thể cho loại phí này
+                </p>
+              </div>
+            )}
+
+            {/* Dynamic fee input based on typeOfBill */}
+            {(manualBill.typeOfBill === "Electricity" || manualBill.typeOfBill === "Water") && (
+              <div>
+                <Label htmlFor="total" className="text-gray-700 mb-2 block">
+                  Tổng tiền (₫) *
+                </Label>
+                <Input
+                  id="total"
+                  type="number"
+                  step="0.01"
+                  placeholder={manualBill.typeOfBill === "Electricity" ? "VD: 3500" : "VD: 15000"}
+                  value={manualBill.total || ""}
+                  onChange={(e) =>
+                    setManualBill({
+                      ...manualBill,
+                      total: e.target.value ? parseFloat(e.target.value) : 0,
+                    })
+                  }
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  {manualBill.typeOfBill === "Electricity" 
+                    ? "Tổng tiền điện (₫)" 
+                    : "Tổng tiền nước (₫)"}
+                </p>
+              </div>
+            )}
+
+            {(manualBill.typeOfBill === "Management" || 
+              manualBill.typeOfBill === "Parking" || 
+              manualBill.typeOfBill === "Internet") && (
+              <div>
+                <Label htmlFor="amount" className="text-gray-700 mb-2 block">
+                  Số tiền (₫) *
+                </Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  step="0.01"
+                  placeholder="VD: 100000"
+                  value={manualBill.amount || ""}
+                  onChange={(e) =>
+                    setManualBill({
+                      ...manualBill,
+                      amount: e.target.value ? parseFloat(e.target.value) : 0,
+                    })
+                  }
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Số tiền cố định hàng tháng cho mỗi căn hộ
+                </p>
+              </div>
+            )}
+
+            {manualBill.typeOfBill === "Other" && (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="amount" className="text-gray-700 mb-2 block">
+                    Số tiền (₫)
+                  </Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    step="0.01"
+                    placeholder="VD: 3500"
+                    value={manualBill.amount || ""}
+                    onChange={(e) =>
+                      setManualBill({
+                        ...manualBill,
+                        amount: e.target.value ? parseFloat(e.target.value) : 0,
+                      })
+                    }
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Nếu phí tính theo đơn vị</p>
+                </div>
+
+                <div>
+                  <Label htmlFor="total" className="text-gray-700 mb-2 block">
+                    Tổng tiền (₫)
+                  </Label>
+                  <Input
+                    id="total"
+                    type="number"
+                    step="0.01"
+                    placeholder="VD: 100000"
+                    value={manualBill.total || ""}
+                    onChange={(e) =>
+                      setManualBill({
+                        ...manualBill,
+                        total: e.target.value ? parseFloat(e.target.value) : 0,
+                      })
+                    }
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Nếu phí cố định</p>
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-3 pt-4">
+              <Button
+                onClick={() => setShowManualBillModal(false)}
+                variant="outline"
+                className="flex-1"
+              >
+                Hủy
+              </Button>
+              <Button
+                onClick={handleManualBillSubmit}
+                disabled={processingManualBill}
+                className="flex-1 bg-red-600 hover:bg-red-700"
+              >
+                {processingManualBill ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    Đang lưu...
+                  </>
+                ) : (
+                  "Lưu hóa đơn"
                 )}
               </Button>
             </div>
