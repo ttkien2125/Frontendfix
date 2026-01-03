@@ -1,4 +1,4 @@
-import { Home, FileText, CreditCard, Building, Users, UserCog, ClipboardList, LogOut, Receipt, Building2, Calculator } from "lucide-react";
+import { Home, FileText, CreditCard, Building, Users, UserCog, ClipboardList, LogOut, Receipt, Building2, Calculator, Bell } from "lucide-react";
 import { Button } from "../ui/button";
 import { Permissions, UserRole } from "../../utils/permissions";
 
@@ -25,6 +25,11 @@ export function Sidebar({ role, activeTab, onTabChange, onLogout }: SidebarProps
 
     if (Permissions.canViewMyPayments(userRole)) {
       items.push({ id: "payments", label: "Thanh toán", icon: CreditCard });
+    }
+
+    // Notifications - For Resident
+    if (Permissions.canViewNotifications(userRole)) {
+      items.push({ id: "notifications", label: "Thông báo", icon: Bell });
     }
 
     // Accountant-specific menu

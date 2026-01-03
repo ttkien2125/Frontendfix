@@ -63,4 +63,9 @@ export const Permissions = {
   canManageAccounting: (role: UserRole): boolean => {
     return role === "Accountant" || role === "Admin";
   },
+
+  // Notifications - Only Resident
+  canViewNotifications: (role: UserRole): boolean => {
+    return role === "Resident";
+  },
 };

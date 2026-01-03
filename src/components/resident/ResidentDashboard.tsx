@@ -3,6 +3,7 @@ import { Sidebar } from "../shared/Sidebar";
 import { ResidentBillsTab } from "./ResidentBillsTab";
 import { ResidentPaymentsTab } from "./ResidentPaymentsTab";
 import { ResidentOverviewTab } from "./ResidentOverviewTab";
+import { NotificationTab } from "./NotificationTab";
 import { AccountManagementTab } from "../admin/AccountManagementTab";
 
 interface ResidentDashboardProps {
@@ -35,6 +36,7 @@ export function ResidentDashboard({ username, role, onLogout }: ResidentDashboar
           {activeTab === "dashboard" && <ResidentOverviewTab />}
           {activeTab === "bills" && <ResidentBillsTab />}
           {activeTab === "payments" && <ResidentPaymentsTab />}
+          {activeTab === "notifications" && <NotificationTab />}
           {activeTab === "accounts" && <AccountManagementTab role={role} />}
         </div>
       </div>
