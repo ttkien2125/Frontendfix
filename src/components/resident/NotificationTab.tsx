@@ -243,7 +243,7 @@ export function NotificationTab() {
                 <div className="flex gap-4">
                   {/* Icon */}
                   <div
-                    className={`flex-shrink-0 rounded-full p-3 ${
+                    className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center ${
                       notification.isRead ? "bg-gray-100" : "bg-white shadow-md"
                     }`}
                   >
