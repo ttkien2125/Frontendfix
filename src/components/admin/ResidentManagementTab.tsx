@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
 import { Checkbox } from "../ui/checkbox";
-import { ShieldAlert, Users, Plus, Pencil, Trash2, Building2 } from "lucide-react";
+import { ShieldAlert, Users, Plus, Pencil, Trash2, Building2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { api, Resident, ResidentCreate, ResidentUpdate, Apartment } from "../../services/api";
 import { LoadingSpinner } from "../shared/LoadingSpinner";
 import { Permissions, UserRole } from "../../utils/permissions";
@@ -27,6 +27,10 @@ export function ResidentManagementTab({ role }: ResidentManagementTabProps) {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedResident, setSelectedResident] = useState<Resident | null>(null);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
 
   // Form states
   const [createForm, setCreateForm] = useState<ResidentCreate>({
@@ -159,6 +163,23 @@ export function ResidentManagementTab({ role }: ResidentManagementTabProps) {
     } catch (error: any) {
       toast.error(error.message || "Không thể xóa cư dân");
     }
+  };
+
+  // Pagination calculations
+  const totalPages = Math.ceil(residents.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedResidents = residents.slice(startIndex, endIndex);
+
+  // Reset to page 1 when itemsPerPage changes
+  const handleItemsPerPageChange = (value: string) => {
+    setItemsPerPage(Number(value));
+    setCurrentPage(1);
+  };
+
+  // Navigate to page
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
   };
 
   if (!canAccess) {
@@ -329,7 +350,7 @@ export function ResidentManagementTab({ role }: ResidentManagementTabProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {residents.map((resident) => (
+                  {paginatedResidents.map((resident) => (
                     <TableRow key={resident.residentID}>
                       <TableCell>{resident.residentID}</TableCell>
                       <TableCell>{resident.fullName}</TableCell>
@@ -503,6 +524,84 @@ export function ResidentManagementTab({ role }: ResidentManagementTabProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Pagination Controls */}
+      {residents.length > 0 && (
+        <Card className="shadow-lg border-blue-200">
+          <CardContent className="pt-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              {/* Items per page selector */}
+              <div className="flex items-center gap-2">
+                <Label htmlFor="itemsPerPage" className="text-gray-700">Hiển thị:</Label>
+                <Select
+                  value={itemsPerPage.toString()}
+                  onValueChange={handleItemsPerPageChange}
+                >
+                  <SelectTrigger className="w-20">
+                    <SelectValue>{itemsPerPage}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5">5</SelectItem>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="15">15</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-gray-600">cư dân/trang</span>
+              </div>
+
+              {/* Page info and navigation */}
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600 text-sm">
+                  Hiển thị {startIndex + 1}-{Math.min(endIndex, residents.length)} của {residents.length} cư dân
+                </span>
+              </div>
+
+              {/* Pagination buttons */}
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => goToPage(1)}
+                  disabled={currentPage === 1}
+                  className="text-blue-600 border-blue-600 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronsLeft className="w-4 h-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="text-blue-600 border-blue-600 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <span className="px-3 py-1 bg-blue-50 text-blue-900 rounded border border-blue-200">
+                  {currentPage} / {totalPages}
+                </span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="text-blue-600 border-blue-600 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => goToPage(totalPages)}
+                  disabled={currentPage === totalPages}
+                  className="text-blue-600 border-blue-600 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronsRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
