@@ -1,0 +1,1618 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{vietnam}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{tocloft}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{float}
+
+\geometry{a4paper, margin=2.5cm}
+
+% Code listing settings
+\lstdefinestyle{typescript}{
+    language=Java,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{green!60!black},
+    stringstyle=\color{red},
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    tabsize=2,
+    captionpos=b
+}
+
+\lstset{style=typescript}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+}
+
+\begin{document}
+
+\section{CHƯƠNG 4. THIẾT KẾ CHƯƠNG TRÌNH}
+
+Chương này trình bày chi tiết về thiết kế chương trình quản lý tòa nhà BlueMoon, bao gồm thiết kế kiến trúc các gói phần mềm frontend và thiết kế giao diện người dùng. Hệ thống được xây dựng theo mô hình client-server với frontend được phát triển bằng React/TypeScript và backend sử dụng Python/FastAPI.
+
+\subsection{Thiết kế chi tiết các gói}
+
+Phần này mô tả chi tiết về cấu trúc các gói (packages) trong ứng dụng frontend BlueMoon, được tổ chức theo kiến trúc component-based với mô hình phân quyền rõ ràng.
+
+\subsubsection{Tổng quan kiến trúc hệ thống}
+
+Hệ thống BlueMoon Frontend được thiết kế theo kiến trúc phân lớp (layered architecture) với các tầng chính:
+
+\begin{itemize}
+    \item \textbf{Presentation Layer}: Các component React đảm nhiệm việc hiển thị giao diện
+    \item \textbf{Business Logic Layer}: Hooks và utilities xử lý logic nghiệp vụ
+    \item \textbf{Data Access Layer}: API services giao tiếp với backend
+    \item \textbf{Infrastructure Layer}: Cấu hình, kiểu dữ liệu và utilities hệ thống
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{verbatim}
+┌─────────────────────────────────────────────────────┐
+│           Presentation Layer (React)                │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐          │
+│  │ Resident │  │  Admin   │  │ Manager  │          │
+│  │Dashboard │  │Dashboard │  │Dashboard │          │
+│  └──────────┘  └──────────┘  └──────────┘          │
+├─────────────────────────────────────────────────────┤
+│        Business Logic Layer (Hooks/Utils)           │
+│  ┌──────────┐  ┌─────────────┐  ┌──────────┐      │
+│  │ useAuth  │  │ Permissions │  │  Utils   │      │
+│  └──────────┘  └─────────────┘  └──────────┘      │
+├─────────────────────────────────────────────────────┤
+│       Data Access Layer (API Services)              │
+│  ┌────────────────────────────────────────┐        │
+│  │      Axios + REST API Client           │        │
+│  └────────────────────────────────────────┘        │
+├─────────────────────────────────────────────────────┤
+│           Infrastructure Layer                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐         │
+│  │TypeScript│  │   CSS    │  │  Config  │         │
+│  │  Types   │  │ Styling  │  │          │         │
+│  └──────────┘  └──────────┘  └──────────┘         │
+└─────────────────────────────────────────────────────┘
+\end{verbatim}
+\caption{Kiến trúc phân lớp hệ thống BlueMoon Frontend}
+\end{figure}
+
+\subsubsection{Cấu trúc thư mục chi tiết}
+
+Dự án được tổ chức theo cấu trúc thư mục rõ ràng, phân chia theo chức năng và vai trò:
+
+\begin{lstlisting}[caption={Cấu trúc thư mục dự án BlueMoon Frontend}]
+/
+├── App.tsx                    # Component gốc, điều hướng routing
+├── components/                # Tất cả các React components
+│   ├── LoginPage.tsx         # Trang đăng nhập
+│   ├── admin/                # Components dành cho Admin/Manager/Accountant
+│   │   ├── AdminDashboard.tsx
+│   │   ├── AdminOverviewTab.tsx
+│   │   ├── AccountManagementTab.tsx
+│   │   ├── ResidentManagementTab.tsx
+│   │   ├── ApartmentManagementTab.tsx
+│   │   ├── BuildingManagersTab.tsx
+│   │   ├── AccountantsTab.tsx
+│   │   ├── OfflinePaymentsTab.tsx
+│   │   ├── AccountingTab.tsx
+│   │   ├── ReceiptManagementTab.tsx
+│   │   ├── BuildingManagementTab.tsx
+│   │   └── ManagerNotificationTab.tsx
+│   ├── resident/             # Components dành cho Resident
+│   │   ├── ResidentDashboard.tsx
+│   │   ├── ResidentOverviewTab.tsx
+│   │   ├── ResidentBillsTab.tsx
+│   │   ├── ResidentPaymentsTab.tsx
+│   │   └── NotificationTab.tsx
+│   ├── shared/               # Components dùng chung
+│   │   ├── Sidebar.tsx
+│   │   └── LoadingSpinner.tsx
+│   └── ui/                   # UI primitives (shadcn/ui)
+│       ├── button.tsx
+│       ├── card.tsx
+│       ├── dialog.tsx
+│       ├── input.tsx
+│       ├── table.tsx
+│       └── ... (50+ UI components)
+├── hooks/                    # Custom React hooks
+│   └── useAuth.ts           # Hook xác thực người dùng
+├── services/                # API services
+│   └── api.ts              # Client giao tiếp với backend
+├── utils/                   # Utilities và helpers
+│   └── permissions.ts      # Logic phân quyền
+└── styles/                  # Global styles
+    └── globals.css         # CSS toàn cục (Tailwind)
+\end{lstlisting}
+
+\subsubsection{Gói Component (components/)}
+
+\paragraph{Gói Admin Components (components/admin/)}
+
+Gói này chứa tất cả các component dành cho các vai trò quản trị (Admin, Manager, Accountant). Các component được thiết kế với các đặc điểm chung:
+
+\begin{itemize}
+    \item \textbf{Role-based access control}: Mỗi component kiểm tra quyền truy cập dựa trên vai trò
+    \item \textbf{CRUD operations}: Hỗ trợ đầy đủ các thao tác Create, Read, Update, Delete
+    \item \textbf{Modal dialogs}: Sử dụng dialog cho các form nhập liệu
+    \item \textbf{Toast notifications}: Thông báo kết quả thao tác cho người dùng
+    \item \textbf{Loading states}: Hiển thị trạng thái loading khi gọi API
+    \item \textbf{Error handling}: Xử lý lỗi toàn diện với thông báo rõ ràng
+\end{itemize}
+
+\textbf{AdminDashboard.tsx}
+
+Component chính cho các vai trò quản trị, đóng vai trò là container điều phối các tab:
+
+\begin{lstlisting}[caption={Interface AdminDashboard}]
+interface AdminDashboardProps {
+  username: string;
+  role: string;
+  onLogout: () => void;
+}
+
+export function AdminDashboard({ 
+  username, 
+  role, 
+  onLogout 
+}: AdminDashboardProps) {
+  const [activeTab, setActiveTab] = useState("dashboard");
+  
+  return (
+    <div className="flex h-screen">
+      <Sidebar 
+        role={role}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onLogout={onLogout}
+      />
+      <div className="flex-1">
+        {/* Render tab dựa trên activeTab */}
+      </div>
+    </div>
+  );
+}
+\end{lstlisting}
+
+\textbf{AccountManagementTab.tsx}
+
+Quản lý tài khoản hệ thống với các chức năng:
+\begin{itemize}
+    \item Xem danh sách tài khoản (Admin/Manager)
+    \item Tạo tài khoản mới với username, password, role
+    \item Cập nhật vai trò tài khoản
+    \item Đổi mật khẩu (tất cả người dùng)
+    \item Vô hiệu hóa tài khoản
+\end{itemize}
+
+\textbf{ResidentManagementTab.tsx}
+
+Quản lý thông tin cư dân với đầy đủ CRUD:
+\begin{itemize}
+    \item Hiển thị danh sách cư dân (bảng phân trang, tìm kiếm)
+    \item Tạo mới cư dân (fullName, age, phoneNumber, apartmentID, isOwner)
+    \item Cập nhật thông tin cư dân
+    \item Xóa cư dân (với confirmation dialog)
+    \item Liên kết cư dân với tài khoản đăng nhập
+\end{itemize}
+
+\textbf{ApartmentManagementTab.tsx}
+
+Quản lý căn hộ trong tòa nhà:
+\begin{itemize}
+    \item Danh sách căn hộ theo tòa nhà
+    \item Thêm căn hộ mới (apartmentID, area, status, buildingID)
+    \item Cập nhật thông tin căn hộ
+    \item Xóa căn hộ
+    \item Hiển thị số lượng cư dân trong mỗi căn hộ
+\end{itemize}
+
+\textbf{AccountingTab.tsx}
+
+Component phức tạp nhất dành cho Accountant và Admin với 4 chức năng chính:
+
+\begin{enumerate}
+    \item \textbf{Nhập chỉ số công tơ}: 
+        \begin{itemize}
+            \item Hỗ trợ 2 phương thức: CSV upload và Manual entry
+            \item CSV: Parse và batch upload nhiều bản ghi
+            \item Manual: Form nhập từng chỉ số điện/nước
+            \item API: \texttt{POST /api/accounting/meter-readings}
+        \end{itemize}
+    
+    \item \textbf{Thêm phí dịch vụ}:
+        \begin{itemize}
+            \item Form động thay đổi theo loại hóa đơn
+            \item Điện/Nước: feePerUnit (đơn giá/đơn vị)
+            \item Quản lý/Gửi xe/Internet: flatFee (phí cố định)
+            \item Other: Tùy chỉnh tên và cả hai loại phí
+            \item API: \texttt{POST /api/accounting/service-fees}
+        \end{itemize}
+    
+    \item \textbf{Tạo hóa đơn thủ công}:
+        \begin{itemize}
+            \item Form chi tiết: apartment, accountant, deadline, typeOfBill
+            \item Tính tổng tiền dựa trên loại hóa đơn
+            \item Validation đầy đủ trước khi submit
+            \item API: \texttt{POST /api/accounting/bills/manual}
+        \end{itemize}
+    
+    \item \textbf{Tính hóa đơn tự động}:
+        \begin{itemize}
+            \item Nhập tháng, năm, deadline
+            \item Checkbox overwrite: ghi đè hóa đơn cũ
+            \item Tự động tính toán dựa trên chỉ số và phí
+            \item API: \texttt{POST /api/accounting/bills/calculate}
+        \end{itemize}
+\end{enumerate}
+
+\textbf{OfflinePaymentsTab.tsx}
+
+Quản lý thanh toán ngoại tuyến (tiền mặt, chuyển khoản):
+\begin{itemize}
+    \item Hiển thị lịch sử thanh toán ngoại tuyến
+    \item Tạo thanh toán: chọn cư dân → chọn hóa đơn → nhập thông tin
+    \item Tự động tính tổng tiền từ các hóa đơn được chọn
+    \item Các phương thức: Tiền mặt, Chuyển khoản
+    \item API: \texttt{POST /api/offline-payment/create}
+\end{itemize}
+
+\textbf{ManagerNotificationTab.tsx}
+
+Gửi thông báo broadcast cho tất cả cư dân (Manager và Admin):
+\begin{itemize}
+    \item Form nhập tiêu đề và nội dung
+    \item Live preview thông báo trước khi gửi
+    \item Character counter (title: 100, content: 1000)
+    \item Warning banner: thông báo gửi đến tất cả cư dân
+    \item Hiển thị last broadcast sau khi gửi thành công
+    \item API: \texttt{POST /api/notification/broadcast}
+\end{itemize}
+
+\textbf{ReceiptManagementTab.tsx}
+
+Quản lý biên lai thanh toán:
+\begin{itemize}
+    \item Xem lịch sử biên lai
+    \item Tìm kiếm và lọc theo ngày, căn hộ
+    \item Hiển thị chi tiết: paymentID, apartmentID, amount, date
+    \item In biên lai (export PDF)
+\end{itemize}
+
+\textbf{BuildingManagementTab.tsx}
+
+Quản lý tòa nhà:
+\begin{itemize}
+    \item CRUD operations cho buildings
+    \item Thông tin: buildingID, name, address, number of floors
+    \item Hiển thị số lượng căn hộ trong mỗi tòa nhà
+\end{itemize}
+
+\textbf{BuildingManagersTab.tsx và AccountantsTab.tsx}
+
+Quản lý người quản lý tòa nhà và kế toán viên:
+\begin{itemize}
+    \item Hiển thị danh sách Manager/Accountant
+    \item Tạo mới với thông tin cá nhân và username liên kết
+    \item Cập nhật thông tin
+    \item Xóa (với kiểm tra ràng buộc dữ liệu)
+\end{itemize}
+
+\paragraph{Gói Resident Components (components/resident/)}
+
+\textbf{ResidentDashboard.tsx}
+
+Component chính cho cư dân, cấu trúc tương tự AdminDashboard:
+
+\begin{lstlisting}[caption={Interface ResidentDashboard}]
+interface ResidentDashboardProps {
+  username: string;
+  role: string;
+  onLogout: () => void;
+}
+\end{lstlisting}
+
+\textbf{ResidentOverviewTab.tsx}
+
+Trang tổng quan cho cư dân:
+\begin{itemize}
+    \item Hiển thị thống kê: Tổng hóa đơn, Chưa thanh toán, Tổng tiền
+    \item Cards với gradient màu xanh theo theme hệ thống
+    \item Icons từ lucide-react: FileText, AlertCircle, DollarSign
+    \item Real-time data từ API: \texttt{GET /api/bills/my-bills}
+\end{itemize}
+
+\textbf{ResidentBillsTab.tsx}
+
+Quản lý hóa đơn của cư dân:
+\begin{itemize}
+    \item Bảng hiển thị tất cả hóa đơn
+    \item Filter theo trạng thái: All, Unpaid, Paid, Overdue
+    \item Checkbox select multiple bills
+    \item Button "Thanh toán" để thanh toán nhiều hóa đơn cùng lúc
+    \item Modal chi tiết hóa đơn
+    \item Tích hợp thanh toán QR (VietQR)
+    \item API: \texttt{GET /api/bills/my-bills}, \texttt{POST /api/qr-payment/create}
+\end{itemize}
+
+\textbf{ResidentPaymentsTab.tsx}
+
+Lịch sử thanh toán:
+\begin{itemize}
+    \item Hiển thị tất cả giao dịch thanh toán
+    \item Phân biệt Online payment và Offline payment
+    \item Hiển thị receipt (biên lai)
+    \item Badge cho payment status
+    \item API: \texttt{GET /api/payments/my-history}
+\end{itemize}
+
+\textbf{NotificationTab.tsx}
+
+Thông báo cho cư dân:
+\begin{itemize}
+    \item Danh sách thông báo (system broadcast + meter reading)
+    \item Đếm số thông báo chưa đọc (unread badge)
+    \item Mark as read cho từng thông báo
+    \item Mark all read cho tất cả
+    \item Hiển thị chi tiết meter reading trong notification
+    \item API: \texttt{GET /api/notification/my-notification}, \texttt{PUT /api/notification/\{id\}/read}
+\end{itemize}
+
+\paragraph{Gói Shared Components (components/shared/)}
+
+\textbf{Sidebar.tsx}
+
+Component sidebar động, thay đổi menu dựa trên role:
+
+\begin{lstlisting}[caption={Logic hiển thị menu dựa trên permissions}]
+const getMenuItems = () => {
+  const items = [];
+  
+  // Dashboard - available to all
+  items.push({ id: "dashboard", label: "Tổng quan", icon: Home });
+  
+  // Resident-specific
+  if (Permissions.canViewMyBills(userRole)) {
+    items.push({ id: "bills", label: "Hóa đơn", icon: FileText });
+  }
+  
+  // Accountant-specific
+  if (Permissions.canManageAccounting(userRole)) {
+    items.push({ id: "accounting", label: "Quản lý kế toán", 
+                 icon: Calculator });
+  }
+  
+  // Manager/Admin-specific
+  if (Permissions.canManageResidents(userRole)) {
+    items.push({ id: "residents", label: "Cư dân", icon: Users });
+  }
+  
+  return items;
+};
+\end{lstlisting}
+
+Đặc điểm:
+\begin{itemize}
+    \item Dynamic menu dựa trên Permissions utility
+    \item Active state cho tab hiện tại
+    \item Gradient background (blue theme)
+    \item Icons từ lucide-react
+    \item Logout button ở cuối sidebar
+\end{itemize}
+
+\textbf{LoadingSpinner.tsx}
+
+Component loading state:
+\begin{itemize}
+    \item Spinner animation với Tailwind CSS
+    \item Sử dụng trong các trạng thái async
+    \item Centered layout với backdrop
+\end{itemize}
+
+\paragraph{Gói UI Components (components/ui/)}
+
+Bộ UI primitives được xây dựng dựa trên shadcn/ui, bao gồm 50+ components:
+
+\begin{table}[H]
+\centering
+\caption{Các UI Components chính}
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+\textbf{Component} & \textbf{Mô tả} \\
+\hline
+Button & Button với variants: default, outline, ghost, destructive \\
+\hline
+Card & Container component với CardHeader, CardContent, CardFooter \\
+\hline
+Dialog & Modal dialog với overlay, sử dụng Radix UI \\
+\hline
+Input & Text input với validation styles \\
+\hline
+Table & Table component với responsive design \\
+\hline
+Select & Dropdown select với search \\
+\hline
+Textarea & Multi-line text input \\
+\hline
+Badge & Label component cho status, tags \\
+\hline
+Alert & Alert/notification box với variants \\
+\hline
+Toast (Sonner) & Toast notifications (sonner library) \\
+\hline
+Checkbox & Checkbox với indeterminate state \\
+\hline
+Label & Form label với accessibility \\
+\hline
+Tabs & Tab navigation component \\
+\hline
+Accordion & Collapsible content sections \\
+\hline
+\end{tabularx}
+\end{table}
+
+Tất cả UI components:
+\begin{itemize}
+    \item Tuân thủ accessibility standards (ARIA)
+    \item Responsive design
+    \item Customizable với Tailwind classes
+    \item TypeScript type-safe
+    \item Consistent styling với design system
+\end{itemize}
+
+\subsubsection{Gói Hooks (hooks/)}
+
+\textbf{useAuth.ts}
+
+Custom hook quản lý authentication state:
+
+\begin{lstlisting}[caption={Interface useAuth hook}]
+interface AuthUser {
+  username: string;
+  role: string;
+}
+
+interface UseAuthReturn {
+  user: AuthUser | null;
+  loading: boolean;
+  error: string | null;
+  login: (username: string, password: string) => Promise<void>;
+  logout: () => void;
+}
+
+export function useAuth(): UseAuthReturn {
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Check existing token on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem("access_token");
+      if (token) {
+        const userData = await api.auth.me();
+        setUser({ username: userData.username, role: userData.role });
+      }
+      setLoading(false);
+    };
+    checkAuth();
+  }, []);
+  
+  const login = async (username: string, password: string) => {
+    const response = await api.auth.login(username, password);
+    setUser({ username: response.username, role: response.role });
+  };
+  
+  const logout = () => {
+    api.auth.logout();
+    setUser(null);
+  };
+  
+  return { user, loading, error, login, logout };
+}
+\end{lstlisting}
+
+Chức năng:
+\begin{itemize}
+    \item Kiểm tra token trong localStorage khi app khởi động
+    \item Gọi API \texttt{/api/auth/me} để verify token
+    \item Quản lý trạng thái đăng nhập/đăng xuất
+    \item Cung cấp user info và role cho toàn bộ app
+    \item Error handling cho authentication failures
+\end{itemize}
+
+\subsubsection{Gói Services (services/)}
+
+\textbf{api.ts}
+
+File này là trung tâm giao tiếp với backend, chứa:
+
+\begin{enumerate}
+    \item \textbf{Type Definitions}: TypeScript interfaces cho tất cả API requests/responses
+    \begin{lstlisting}[caption={Ví dụ Type Definitions}]
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  access_token: string;
+  token_type: string;
+  username: string;
+  role: string;
+}
+
+export interface Bill {
+  billID: number;
+  apartmentID?: string;
+  accountantID?: number;
+  createDate?: string;
+  deadline?: string;
+  typeOfBill?: string;
+  total?: number;
+  amount?: number;
+  status?: string;
+}
+    \end{lstlisting}
+    
+    \item \textbf{API Client Configuration}:
+    \begin{lstlisting}[caption={Cấu hình API Client}]
+const API_BASE_URL = "http://localhost:8000";
+
+// Helper function để tạo headers với authentication
+const getAuthHeaders = (): Record<string, string> => {
+  const token = localStorage.getItem("access_token");
+  return {
+    "Content-Type": "application/json",
+    ...(token && { Authorization: `Bearer ${token}` }),
+  };
+};
+
+// Generic fetch wrapper với error handling
+async function apiRequest<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers: { ...getAuthHeaders(), ...options.headers },
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || "API request failed");
+  }
+  
+  return response.json();
+}
+    \end{lstlisting}
+    
+    \item \textbf{API Modules}: Tổ chức theo nhóm chức năng
+    
+    \begin{table}[H]
+    \centering
+    \caption{Các API Modules}
+    \begin{tabularx}{\textwidth}{|l|X|}
+    \hline
+    \textbf{Module} & \textbf{Endpoints} \\
+    \hline
+    auth & login, logout, me, changePassword \\
+    \hline
+    accounts & getAll, create, update, delete, updateRole \\
+    \hline
+    residents & getAll, getById, create, update, delete \\
+    \hline
+    apartments & getAll, getById, create, update, delete \\
+    \hline
+    bills & getMyBills, getBillById, getByApartment \\
+    \hline
+    payments & createQR, getMyHistory, verifyPayment \\
+    \hline
+    offlinePayments & create, getAll \\
+    \hline
+    accounting & createMeterReading, createServiceFee, createManualBill, calculateBills \\
+    \hline
+    notifications & getMyNotifications, markAsRead, markAllRead, broadcast \\
+    \hline
+    receipts & getAll, getById, generatePDF \\
+    \hline
+    buildings & getAll, getById, create, update, delete \\
+    \hline
+    managers & getAll, create, update, delete \\
+    \hline
+    accountants & getAll, create, update, delete \\
+    \hline
+    \end{tabularx}
+    \end{table}
+    
+    \begin{lstlisting}[caption={Ví dụ API Module - Bills}]
+export const api = {
+  bills: {
+    getMyBills: async (): Promise<Bill[]> => {
+      return apiRequest<Bill[]>("/api/bills/my-bills");
+    },
+    
+    getBillById: async (billId: number): Promise<Bill> => {
+      return apiRequest<Bill>(`/api/bills/${billId}`);
+    },
+    
+    getByApartment: async (apartmentId: string): Promise<Bill[]> => {
+      return apiRequest<Bill[]>(`/api/bills/apartment/${apartmentId}`);
+    },
+  },
+  
+  payments: {
+    createQR: async (billIds: number[]): Promise<QRPaymentResponse> => {
+      return apiRequest<QRPaymentResponse>("/api/qr-payment/create", {
+        method: "POST",
+        body: JSON.stringify({ billIds }),
+      });
+    },
+    
+    getMyHistory: async (): Promise<PaymentTransaction[]> => {
+      return apiRequest<PaymentTransaction[]>("/api/payments/my-history");
+    },
+  },
+  
+  // ... các modules khác
+};
+    \end{lstlisting}
+\end{enumerate}
+
+Đặc điểm của API service:
+\begin{itemize}
+    \item Type-safe với TypeScript
+    \item Centralized error handling
+    \item Automatic token injection
+    \item RESTful design patterns
+    \item Promise-based async/await
+    \item Comprehensive type definitions cho tất cả endpoints
+\end{itemize}
+
+\subsubsection{Gói Utils (utils/)}
+
+\textbf{permissions.ts}
+
+Utility quản lý phân quyền role-based access control:
+
+\begin{lstlisting}[caption={Permissions utility}]
+export type UserRole = "Resident" | "Accountant" | "Manager" | "Admin";
+
+export const Permissions = {
+  // Account Management - Only Manager and Admin
+  canManageAccounts: (role: UserRole): boolean => {
+    return role === "Manager" || role === "Admin";
+  },
+
+  // Building Managers - Only Manager and Admin
+  canManageBuildingManagers: (role: UserRole): boolean => {
+    return role === "Manager" || role === "Admin";
+  },
+
+  // Buildings - Only Manager and Admin
+  canManageBuildings: (role: UserRole): boolean => {
+    return role === "Manager" || role === "Admin";
+  },
+
+  // Accountants - Only Manager and Admin
+  canManageAccountants: (role: UserRole): boolean => {
+    return role === "Manager" || role === "Admin";
+  },
+
+  // Residents - Only Manager and Admin
+  canManageResidents: (role: UserRole): boolean => {
+    return role === "Manager" || role === "Admin";
+  },
+
+  // Apartments - Accountant, Manager, and Admin
+  canViewApartments: (role: UserRole): boolean => {
+    return role === "Accountant" || role === "Manager" || role === "Admin";
+  },
+
+  // Bills - Only Resident and Admin
+  canViewMyBills: (role: UserRole): boolean => {
+    return role === "Resident" || role === "Admin";
+  },
+
+  // Payments - Only Resident and Admin
+  canViewMyPayments: (role: UserRole): boolean => {
+    return role === "Resident" || role === "Admin";
+  },
+
+  // Offline Payments - Only Accountant and Admin
+  canManageOfflinePayments: (role: UserRole): boolean => {
+    return role === "Accountant" || role === "Admin";
+  },
+
+  // Receipts - Only Accountant and Admin
+  canViewReceipts: (role: UserRole): boolean => {
+    return role === "Accountant" || role === "Admin";
+  },
+
+  // Accounting - Only Accountant and Admin
+  canManageAccounting: (role: UserRole): boolean => {
+    return role === "Accountant" || role === "Admin";
+  },
+
+  // Notifications - Only Resident
+  canViewNotifications: (role: UserRole): boolean => {
+    return role === "Resident";
+  },
+
+  // Broadcast Notifications - Only Manager and Admin
+  canBroadcastNotifications: (role: UserRole): boolean => {
+    return role === "Manager" || role === "Admin";
+  },
+};
+\end{lstlisting}
+
+Sử dụng trong components:
+
+\begin{lstlisting}[caption={Ví dụ sử dụng Permissions}]
+export function ResidentManagementTab({ role }: { role: string }) {
+  const canAccess = Permissions.canManageResidents(role as UserRole);
+
+  if (!canAccess) {
+    return (
+      <Card>
+        <CardContent>
+          <ShieldAlert className="w-12 h-12 text-red-500" />
+          <h3>Không có quyền truy cập</h3>
+          <p>Chỉ Manager và Admin mới có quyền quản lý cư dân</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // ... component logic
+}
+\end{lstlisting}
+
+\subsubsection{Luồng dữ liệu trong hệ thống}
+
+\begin{figure}[H]
+\centering
+\begin{verbatim}
+┌──────────────┐      ┌──────────────┐      ┌──────────────┐
+│   User       │      │  Component   │      │   useAuth    │
+│   Action     │─────>│    (React)   │─────>│    Hook      │
+└──────────────┘      └──────────────┘      └──────────────┘
+                             │                      │
+                             │ Call API             │ Get user state
+                             ↓                      ↓
+                      ┌──────────────┐      ┌──────────────┐
+                      │ API Service  │      │ localStorage │
+                      │   (api.ts)   │      │   (token)    │
+                      └──────────────┘      └──────────────┘
+                             │
+                             │ HTTP Request
+                             ↓
+                      ┌──────────────┐
+                      │   Backend    │
+                      │  (FastAPI)   │
+                      └──────────────┘
+                             │
+                             │ Response
+                             ↓
+                      ┌──────────────┐
+                      │  Component   │
+                      │   Re-render  │
+                      └──────────────┘
+\end{verbatim}
+\caption{Luồng dữ liệu trong BlueMoon Frontend}
+\end{figure}
+
+\subsubsection{State Management Strategy}
+
+Hệ thống sử dụng chiến lược quản lý state phân tầng:
+
+\begin{enumerate}
+    \item \textbf{Local Component State}: useState cho UI state (modals, forms)
+    \item \textbf{Custom Hooks}: useAuth cho global authentication state
+    \item \textbf{Props Drilling}: Truyền role và user info qua props
+    \item \textbf{LocalStorage}: Persist authentication token
+    \item \textbf{API as Source of Truth}: Server state được fetch mỗi lần mount
+\end{enumerate}
+
+\begin{lstlisting}[caption={Ví dụ State Management trong Component}]
+export function ResidentBillsTab() {
+  // Local UI state
+  const [bills, setBills] = useState<Bill[]>([]);
+  const [selectedBills, setSelectedBills] = useState<number[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  
+  // Fetch data on mount
+  useEffect(() => {
+    const fetchBills = async () => {
+      setIsLoading(true);
+      try {
+        const data = await api.bills.getMyBills();
+        setBills(data);
+      } catch (error) {
+        toast.error("Không thể tải hóa đơn");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchBills();
+  }, []);
+  
+  // Event handlers
+  const handlePayment = async () => {
+    try {
+      await api.payments.createQR(selectedBills);
+      toast.success("Tạo thanh toán thành công");
+      setShowPaymentModal(false);
+    } catch (error) {
+      toast.error("Không thể tạo thanh toán");
+    }
+  };
+  
+  return (/* JSX */);
+}
+\end{lstlisting}
+
+\subsubsection{Kỹ thuật tối ưu hiệu năng}
+
+\begin{itemize}
+    \item \textbf{React.memo}: Memoization cho các component không thay đổi thường xuyên
+    \item \textbf{useCallback}: Memoize event handlers
+    \item \textbf{Lazy Loading}: Code splitting cho các routes
+    \item \textbf{Debouncing}: Cho search inputs
+    \item \textbf{Pagination}: Giảm số lượng data render cùng lúc
+    \item \textbf{Conditional Rendering}: Chỉ render components khi cần thiết
+\end{itemize}
+
+\subsection{Thiết kế giao diện}
+
+Phần này trình bày chi tiết về thiết kế giao diện người dùng (UI/UX) của hệ thống BlueMoon, bao gồm hệ thống màu sắc, typography, layout patterns, và các màn hình chính.
+
+\subsubsection{Hệ thống thiết kế (Design System)}
+
+\paragraph{Màu sắc chủ đạo}
+
+Hệ thống sử dụng bảng màu xanh dương (blue) làm màu chủ đạo, tạo cảm giác chuyên nghiệp, đáng tin cậy và hiện đại.
+
+\begin{table}[H]
+\centering
+\caption{Bảng màu chính}
+\begin{tabularx}{\textwidth}{|l|l|X|}
+\hline
+\textbf{Màu} & \textbf{Tailwind Class} & \textbf{Sử dụng} \\
+\hline
+Blue 600 & bg-blue-600 & Primary buttons, headers, active states \\
+\hline
+Blue 700 & bg-blue-700 & Hover states, darker accents \\
+\hline
+Blue 800 & bg-blue-800 & Sidebar background (bottom) \\
+\hline
+Blue 900 & bg-blue-900 & Sidebar background (top) \\
+\hline
+Indigo 600 & bg-indigo-600 & Gradient combinations \\
+\hline
+Blue 50 & bg-blue-50 & Light backgrounds, hover states \\
+\hline
+Blue 100 & text-blue-100 & Secondary text on dark backgrounds \\
+\hline
+Blue 200 & border-blue-200 & Card borders, dividers \\
+\hline
+\end{tabularx}
+\end{table}
+
+\paragraph{Gradients}
+
+Hệ thống sử dụng gradients để tạo chiều sâu và visual interest:
+
+\begin{lstlisting}[caption={Gradient Classes}]
+// Header gradient
+className="bg-gradient-to-r from-blue-600 to-indigo-600"
+
+// Sidebar gradient
+className="bg-gradient-to-b from-blue-900 to-blue-800"
+
+// Background gradient
+className="bg-gradient-to-br from-blue-50 to-indigo-50"
+
+// Card header gradient
+className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+\end{lstlisting}
+
+\paragraph{Typography}
+
+Hệ thống typography được định nghĩa trong \texttt{styles/globals.css}:
+
+\begin{lstlisting}[caption={Typography System}]
+@layer base {
+  h1 {
+    @apply text-3xl font-bold text-gray-900;
+  }
+  
+  h2 {
+    @apply text-2xl font-semibold text-gray-900;
+  }
+  
+  h3 {
+    @apply text-xl font-semibold text-gray-800;
+  }
+  
+  h4 {
+    @apply text-lg font-medium text-gray-800;
+  }
+  
+  p {
+    @apply text-base text-gray-700;
+  }
+}
+\end{lstlisting}
+
+\paragraph{Spacing và Layout}
+
+\begin{itemize}
+    \item \textbf{Padding}: Sử dụng scale 4, 6, 8 (1rem = 4 units)
+    \item \textbf{Margins}: Consistent spacing giữa các sections
+    \item \textbf{Gap}: space-y-4, space-y-6 cho vertical spacing
+    \item \textbf{Border Radius}: rounded-lg (0.5rem) cho cards và buttons
+\end{itemize}
+
+\paragraph{Shadows}
+
+\begin{table}[H]
+\centering
+\caption{Shadow System}
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+\textbf{Class} & \textbf{Sử dụng} \\
+\hline
+shadow-sm & Subtle elevation cho inputs \\
+\hline
+shadow-md & Default card shadow \\
+\hline
+shadow-lg & Elevated cards, modals \\
+\hline
+shadow-xl & Sidebar, important UI elements \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsubsection{Layout Patterns}
+
+\paragraph{Dashboard Layout}
+
+Tất cả dashboards sử dụng layout 2-column với sidebar cố định:
+
+\begin{lstlisting}[caption={Dashboard Layout Structure}]
+<div className="flex h-screen">
+  {/* Sidebar - Fixed width 256px */}
+  <Sidebar 
+    role={role}
+    activeTab={activeTab}
+    onTabChange={setActiveTab}
+    onLogout={onLogout}
+  />
+  
+  {/* Main Content - Flexible */}
+  <div className="flex-1 overflow-auto">
+    {/* Header */}
+    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6">
+      <h2>Xin chào, {username}</h2>
+      <p>Bảng điều khiển {role}</p>
+    </div>
+    
+    {/* Content Area */}
+    <div className="p-8">
+      {/* Tab content */}
+    </div>
+  </div>
+</div>
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\begin{verbatim}
+┌─────────────────────────────────────────────────────────┐
+│  ┌─────────────┐  ┌────────────────────────────────┐   │
+│  │             │  │ Header (Gradient)              │   │
+│  │   Sidebar   │  │ Xin chào, [username]           │   │
+│  │             │  │ Bảng điều khiển [role]         │   │
+│  │ • Tổng quan │  ├────────────────────────────────┤   │
+│  │ • Hóa đơn   │  │                                │   │
+│  │ • Thanh toán│  │  Content Area (Scrollable)     │   │
+│  │ • Thông báo │  │                                │   │
+│  │             │  │  [Tab-specific content]        │   │
+│  │             │  │                                │   │
+│  │             │  │                                │   │
+│  │             │  │                                │   │
+│  │ [Logout]    │  │                                │   │
+│  └─────────────┘  └────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────┘
+\end{verbatim}
+\caption{Dashboard Layout Pattern}
+\end{figure}
+
+\paragraph{Card-based Layout}
+
+Các tab content sử dụng card-based layout để tổ chức thông tin:
+
+\begin{lstlisting}[caption={Card Layout Example}]
+<div className="space-y-6">
+  {/* Stats Cards */}
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <Card>
+      <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600">
+        <CardTitle>Tổng hóa đơn</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-3xl font-bold">{totalBills}</p>
+      </CardContent>
+    </Card>
+    {/* More cards... */}
+  </div>
+  
+  {/* Data Table Card */}
+  <Card>
+    <CardHeader>
+      <CardTitle>Danh sách hóa đơn</CardTitle>
+      <Button onClick={handleCreate}>Tạo mới</Button>
+    </CardHeader>
+    <CardContent>
+      <Table>
+        {/* Table content */}
+      </Table>
+    </CardContent>
+  </Card>
+</div>
+\end{lstlisting}
+
+\paragraph{Modal/Dialog Layout}
+
+Dialogs sử dụng centered overlay pattern:
+
+\begin{lstlisting}[caption={Dialog Layout}]
+<Dialog open={showModal} onOpenChange={setShowModal}>
+  <DialogContent className="max-w-2xl">
+    <DialogHeader>
+      <DialogTitle className="text-center text-blue-900 text-2xl">
+        [Title]
+      </DialogTitle>
+      <DialogDescription className="text-center text-gray-500">
+        [Description]
+      </DialogDescription>
+    </DialogHeader>
+    
+    <div className="p-6 space-y-4">
+      {/* Form fields */}
+    </div>
+    
+    <div className="flex gap-3 pt-4">
+      <Button variant="outline" onClick={handleCancel}>Hủy</Button>
+      <Button onClick={handleSubmit}>Xác nhận</Button>
+    </div>
+  </DialogContent>
+</Dialog>
+\end{lstlisting}
+
+\subsubsection{Các màn hình chính}
+
+\paragraph{Màn hình đăng nhập (LoginPage)}
+
+\begin{figure}[H]
+\centering
+\begin{verbatim}
+┌─────────────────────────────────────────────┐
+│                                             │
+│              [BlueMoon Logo]                │
+│                                             │
+│    ┌───────────────────────────────┐       │
+│    │  Đăng nhập hệ thống           │       │
+│    │                               │       │
+│    │  Username: [_______________]  │       │
+│    │                               │       │
+│    │  Password: [_______________]  │       │
+│    │                               │       │
+│    │  [     Đăng nhập     ]        │       │
+│    │                               │       │
+│    │  [error message if exists]    │       │
+│    └───────────────────────────────┘       │
+│                                             │
+└─────────────────────────────────────────────┘
+\end{verbatim}
+\caption{Wireframe - Màn hình đăng nhập}
+\end{figure}
+
+Đặc điểm:
+\begin{itemize}
+    \item Centered card layout
+    \item Gradient background (blue-50 to indigo-50)
+    \item Form validation real-time
+    \item Loading state khi đang xác thực
+    \item Error messages hiển thị dưới form
+    \item Enter key submit form
+\end{itemize}
+
+\paragraph{Màn hình Resident Dashboard - Overview Tab}
+
+\begin{figure}[H]
+\centering
+\begin{verbatim}
+┌──────────────────────────────────────────────────────────┐
+│ Sidebar  │  Header: Xin chào, [username]                 │
+│          │  Bảng điều khiển Resident                     │
+│ • Tổng   ├───────────────────────────────────────────────┤
+│   quan   │                                               │
+│ • Hóa    │  ┌─────────┐ ┌─────────┐ ┌─────────┐         │
+│   đơn    │  │ Tổng    │ │ Chưa    │ │ Tổng    │         │
+│ • Thanh  │  │ hóa đơn │ │ thanh   │ │ tiền    │         │
+│   toán   │  │         │ │ toán    │ │         │         │
+│ • Thông  │  │   [N]   │ │   [N]   │ │ [VND]   │         │
+│   báo    │  └─────────┘ └─────────┘ └─────────┘         │
+│          │                                               │
+│ [Logout] │  Hóa đơn gần đây:                             │
+│          │  ┌───────────────────────────────────────┐   │
+│          │  │ ID │ Loại   │ Số tiền │ Hạn    │ TT  │   │
+│          │  ├────┼────────┼─────────┼────────┼─────┤   │
+│          │  │ 1  │ Điện   │ 500K    │ 15/01  │ Chưa│   │
+│          │  │ 2  │ Nước   │ 200K    │ 15/01  │ Chưa│   │
+│          │  └───────────────────────────────────────┘   │
+└──────────────────────────────────────────────────────────┘
+\end{verbatim}
+\caption{Wireframe - Resident Overview Tab}
+\end{figure}
+
+Components:
+\begin{itemize}
+    \item 3 thẻ thống kê với gradient headers
+    \item Icons: FileText, AlertCircle, DollarSign
+    \item Bảng hóa đơn gần đây với pagination
+    \item Auto-refresh data khi tab được focus
+\end{itemize}
+
+\paragraph{Màn hình Resident - Bills Tab}
+
+\begin{figure}[H]
+\centering
+\begin{verbatim}
+┌──────────────────────────────────────────────────────────┐
+│ Sidebar  │  Quản lý hóa đơn                              │
+│          ├───────────────────────────────────────────────┤
+│          │  [Filter: All ▼] [Search: ________] [Tạo QR] │
+│          │                                               │
+│          │  ┌─────────────────────────────────────────┐ │
+│          │  │☐│ID│Loại│Tổng tiền│Hạn│Trạng thái│...│ │ │
+│          │  ├─┼──┼────┼─────────┼───┼──────────┼───┤ │ │
+│          │  │☐│1 │Điện│ 500,000 │..│Chưa TT   │...│ │ │
+│          │  │☑│2 │Nước│ 200,000 │..│Chưa TT   │...│ │ │
+│          │  │☐│3 │QL  │1,000,000│..│Đã TT     │...│ │ │
+│          │  └─────────────────────────────────────────┘ │
+│          │                                               │
+│          │  Đã chọn: 1 hóa đơn, Tổng: 200,000 VND        │
+│          │                                               │
+└──────────────────────────────────────────────────────────┘
+\end{verbatim}
+\caption{Wireframe - Bills Tab}
+\end{figure}
+
+Tính năng:
+\begin{itemize}
+    \item Checkbox select multiple bills
+    \item Filter dropdown: All, Unpaid, Paid, Overdue
+    \item Search box (realtime)
+    \item Tạo QR button (disabled nếu không chọn bill)
+    \item Row actions: View details, Payment history
+    \item Status badges với colors: Gray (Paid), Red (Overdue), Yellow (Unpaid)
+\end{itemize}
+
+\paragraph{Màn hình Admin - Accounting Tab}
+
+\begin{figure}[H]
+\centering
+\begin{verbatim}
+┌──────────────────────────────────────────────────────────┐
+│ Sidebar  │  Quản lý kế toán                              │
+│          ├───────────────────────────────────────────────┤
+│          │  ┌──────────────┐  ┌──────────────┐          │
+│          │  │  [Icon]      │  │  [Icon]      │          │
+│          │  │  Nhập chỉ số │  │  Thêm phí DV │          │
+│          │  │  công tơ     │  │              │          │
+│          │  └──────────────┘  └──────────────┘          │
+│          │                                               │
+│          │  ┌──────────────┐  ┌──────────────┐          │
+│          │  │  [Icon]      │  │  [Icon]      │          │
+│          │  │  Tạo hóa đơn │  │  Tính hóa đơn│          │
+│          │  │  thủ công    │  │  tự động     │          │
+│          │  └──────────────┘  └──────────────┘          │
+│          │                                               │
+│          │  Lịch sử hoạt động gần đây:                  │
+│          │  • [Timestamp] - Nhập chỉ số căn A101        │
+│          │  • [Timestamp] - Tạo hóa đơn điện tháng 12   │
+└──────────────────────────────────────────────────────────┘
+\end{verbatim}
+\caption{Wireframe - Accounting Tab}
+\end{figure}
+
+4 cards chính:
+\begin{enumerate}
+    \item \textbf{Nhập chỉ số công tơ}:
+    \begin{itemize}
+        \item Modal với 2 options: CSV Upload / Manual Entry
+        \item CSV: File upload với preview
+        \item Manual: Form với apartment select, old/new readings
+    \end{itemize}
+    
+    \item \textbf{Thêm phí dịch vụ}:
+    \begin{itemize}
+        \item Dynamic form thay đổi theo bill type
+        \item Fields: month, year, billType, feePerUnit hoặc flatFee
+        \item Validation: positive numbers only
+    \end{itemize}
+    
+    \item \textbf{Tạo hóa đơn thủ công}:
+    \begin{itemize}
+        \item Full manual bill creation
+        \item Select: apartment, accountant, bill type
+        \item Date pickers: createDate, deadline
+        \item Amount/total calculation
+    \end{itemize}
+    
+    \item \textbf{Tính hóa đơn tự động}:
+    \begin{itemize}
+        \item Simple form: month, year, deadline\_day
+        \item Checkbox: overwrite existing bills
+        \item Confirmation dialog trước khi execute
+        \item Progress indicator khi calculating
+    \end{itemize}
+\end{enumerate}
+
+\paragraph{Màn hình Manager - Notification Tab}
+
+\begin{figure}[H]
+\centering
+\begin{verbatim}
+┌──────────────────────────────────────────────────────────┐
+│ Sidebar  │  Quản lý thông báo                            │
+│          ├───────────────────────────────────────────────┤
+│          │  ┌─────────────────────────────────────────┐ │
+│          │  │   [Bell Icon]                           │ │
+│          │  │   Gửi thông báo                         │ │
+│          │  │                                         │ │
+│          │  │   Thông báo sẽ được gửi đến tất cả cư   │ │
+│          │  │   dân trong hệ thống                    │ │
+│          │  │                                         │ │
+│          │  │   [  Tạo thông báo mới  ]               │ │
+│          │  └─────────────────────────────────────────┘ │
+│          │                                               │
+│          │  ┌─────────────────────────────────────────┐ │
+│          │  │ ⚠ Lưu ý quan trọng                      │ │
+│          │  │                                         │ │
+│          │  │ • Gửi đến tất cả cư dân                 │ │
+│          │  │ • Không thể thu hồi                     │ │
+│          │  │ • Dùng cho thông báo quan trọng         │ │
+│          │  └─────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────┘
+\end{verbatim}
+\caption{Wireframe - Manager Notification Tab}
+\end{figure}
+
+Broadcast Modal:
+\begin{lstlisting}[caption={Notification Modal Structure}]
+┌───────────────────────────────────────────┐
+│  ⚠ Cảnh báo: Gửi đến tất cả cư dân        │
+├───────────────────────────────────────────┤
+│  Tiêu đề: [_________________________]    │
+│           0/100 ký tự                     │
+│                                           │
+│  Nội dung:                                │
+│  [_____________________________________]  │
+│  [_____________________________________]  │
+│  [_____________________________________]  │
+│  0/1000 ký tự                             │
+│                                           │
+│  Xem trước:                               │
+│  ┌─────────────────────────────────────┐ │
+│  │ [Title preview]                     │ │
+│  │ [Content preview]                   │ │
+│  │ [Timestamp]                         │ │
+│  └─────────────────────────────────────┘ │
+│                                           │
+│  [  Hủy  ]         [  Gửi thông báo  ]   │
+└───────────────────────────────────────────┘
+\end{lstlisting}
+
+\subsubsection{Responsive Design}
+
+Hệ thống được thiết kế responsive cho các breakpoints:
+
+\begin{table}[H]
+\centering
+\caption{Responsive Breakpoints}
+\begin{tabularx}{\textwidth}{|l|l|X|}
+\hline
+\textbf{Screen} & \textbf{Tailwind} & \textbf{Adaptations} \\
+\hline
+Mobile & < 640px & Sidebar collapse to hamburger menu, single column cards \\
+\hline
+Tablet & 640px - 1024px & 2-column card grid, sidebar remains visible \\
+\hline
+Desktop & > 1024px & 3-column card grid, full layout \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{lstlisting}[caption={Responsive Grid Example}]
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <Card>...</Card>
+  <Card>...</Card>
+  <Card>...</Card>
+</div>
+\end{lstlisting}
+
+\subsubsection{Interaction Patterns}
+
+\paragraph{Loading States}
+
+Tất cả async operations hiển thị loading state:
+
+\begin{lstlisting}[caption={Loading State Pattern}]
+{isLoading ? (
+  <div className="flex items-center justify-center py-12">
+    <div className="w-8 h-8 border-4 border-blue-600 
+                    border-t-transparent rounded-full animate-spin" />
+    <span className="ml-3">Đang tải...</span>
+  </div>
+) : (
+  <DataTable data={data} />
+)}
+\end{lstlisting}
+
+\paragraph{Toast Notifications}
+
+Success và error notifications sử dụng toast (sonner):
+
+\begin{lstlisting}[caption={Toast Notification Pattern}]
+// Success toast
+toast.success("Tạo hóa đơn thành công");
+
+// Error toast
+toast.error("Không thể kết nối đến server");
+
+// Toast với description
+toast("Hóa đơn mới", {
+  description: "Bạn có 3 hóa đơn mới chưa thanh toán",
+});
+\end{lstlisting}
+
+\paragraph{Confirmation Dialogs}
+
+Các thao tác nguy hiểm (delete) yêu cầu confirmation:
+
+\begin{lstlisting}[caption={Confirmation Dialog Pattern}]
+<AlertDialog open={showDeleteDialog}>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
+      <AlertDialogDescription>
+        Bạn có chắc chắn muốn xóa cư dân này?
+        Hành động này không thể hoàn tác.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>Hủy</AlertDialogCancel>
+      <AlertDialogAction 
+        onClick={handleDelete}
+        className="bg-red-600"
+      >
+        Xóa
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+\end{lstlisting}
+
+\paragraph{Form Validation}
+
+Real-time validation với error messages:
+
+\begin{lstlisting}[caption={Form Validation Pattern}]
+<div>
+  <Label htmlFor="username">Tên đăng nhập</Label>
+  <Input
+    id="username"
+    value={username}
+    onChange={(e) => setUsername(e.target.value)}
+    className={errors.username ? "border-red-500" : ""}
+  />
+  {errors.username && (
+    <p className="text-sm text-red-500 mt-1">
+      {errors.username}
+    </p>
+  )}
+</div>
+\end{lstlisting}
+
+\subsubsection{Accessibility (A11y)}
+
+Hệ thống tuân thủ các chuẩn accessibility:
+
+\begin{itemize}
+    \item \textbf{Keyboard Navigation}: Tab order logic, Enter/Escape keys
+    \item \textbf{ARIA Labels}: Proper labels cho screen readers
+    \item \textbf{Color Contrast}: Đạt WCAG AA standard (4.5:1)
+    \item \textbf{Focus States}: Visible focus indicators
+    \item \textbf{Semantic HTML}: Proper heading hierarchy, landmarks
+\end{itemize}
+
+\begin{lstlisting}[caption={Accessibility Features Example}]
+<Button
+  aria-label="Tạo hóa đơn mới"
+  aria-pressed={isActive}
+  tabIndex={0}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      handleClick();
+    }
+  }}
+>
+  <Plus className="w-5 h-5" aria-hidden="true" />
+  Tạo mới
+</Button>
+\end{lstlisting}
+
+\subsubsection{Icon System}
+
+Sử dụng lucide-react icon library với 40+ icons:
+
+\begin{table}[H]
+\centering
+\caption{Icon Usage}
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+\textbf{Icon} & \textbf{Usage} \\
+\hline
+Home & Dashboard/Overview tab \\
+\hline
+FileText & Bills, Documents \\
+\hline
+CreditCard & Payments, Offline Payments \\
+\hline
+Users & Residents, Managers \\
+\hline
+Building, Building2 & Apartments, Buildings \\
+\hline
+Calculator & Accounting \\
+\hline
+Bell & Notifications \\
+\hline
+Receipt & Receipts \\
+\hline
+UserCog & Account management \\
+\hline
+ClipboardList & Building managers, Accountants \\
+\hline
+LogOut & Logout button \\
+\hline
+Plus, Edit, Trash2 & CRUD actions \\
+\hline
+Send & Broadcast notifications \\
+\hline
+AlertCircle & Warnings, Info \\
+\hline
+CheckCircle2 & Success states \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsubsection{Animation và Transitions}
+
+Smooth transitions cho better UX:
+
+\begin{lstlisting}[caption={Transition Examples}]
+// Hover transitions
+className="transition-colors hover:bg-blue-700"
+
+// Opacity fade
+className="transition-opacity opacity-0 group-hover:opacity-100"
+
+// Scale animation
+className="transition-transform hover:scale-105"
+
+// Loading spinner
+className="animate-spin"
+
+// Slide-in animation (Tailwind + CSS)
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+\end{lstlisting}
+
+\subsubsection{Error States}
+
+Hiển thị error states rõ ràng:
+
+\begin{lstlisting}[caption={Error State UI}]
+<Card className="border-red-200">
+  <CardContent className="flex flex-col items-center py-12">
+    <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
+    <h3 className="text-red-900 mb-2">Có lỗi xảy ra</h3>
+    <p className="text-red-600 text-center">
+      {error.message}
+    </p>
+    <Button 
+      onClick={handleRetry}
+      className="mt-4"
+      variant="outline"
+    >
+      Thử lại
+    </Button>
+  </CardContent>
+</Card>
+\end{lstlisting}
+
+\subsubsection{Empty States}
+
+Hiển thị empty states khi không có dữ liệu:
+
+\begin{lstlisting}[caption={Empty State UI}]
+{bills.length === 0 ? (
+  <div className="flex flex-col items-center justify-center py-12">
+    <FileText className="w-16 h-16 text-gray-300 mb-4" />
+    <h3 className="text-gray-900 mb-2">Chưa có hóa đơn</h3>
+    <p className="text-gray-600 text-center mb-4">
+      Bạn chưa có hóa đơn nào trong hệ thống
+    </p>
+    <Button onClick={handleCreate}>
+      <Plus className="w-4 h-4 mr-2" />
+      Tạo hóa đơn đầu tiên
+    </Button>
+  </div>
+) : (
+  <Table data={bills} />
+)}
+\end{lstlisting}
+
+\subsubsection{Tổng kết thiết kế giao diện}
+
+Hệ thống giao diện BlueMoon được thiết kế với các nguyên tắc:
+
+\begin{enumerate}
+    \item \textbf{Consistency}: Sử dụng design system nhất quán
+    \item \textbf{Clarity}: Thông tin rõ ràng, dễ hiểu
+    \item \textbf{Feedback}: Phản hồi ngay lập tức cho mọi hành động
+    \item \textbf{Accessibility}: Đ��m bảo truy cập cho tất cả người dùng
+    \item \textbf{Responsiveness}: Hoạt động tốt trên mọi thiết bị
+    \item \textbf{Error Prevention}: Validation và confirmation dialogs
+    \item \textbf{Professional Aesthetics}: Blue theme chuyên nghiệp, hiện đại
+\end{enumerate}
+
+\subsection{Kết luận}
+
+Chương 4 đã trình bày chi tiết về thiết kế chương trình quản lý tòa nhà BlueMoon, bao gồm:
+
+\begin{itemize}
+    \item Kiến trúc phân lớp với separation of concerns rõ ràng
+    \item Tổ chức code theo component-based architecture
+    \item Hệ thống phân quyền role-based access control toàn diện
+    \item API service layer type-safe với TypeScript
+    \item Design system nhất quán với blue theme
+    \item UI/UX patterns hiện đại: card-based layout, modals, toast notifications
+    \item Responsive design cho mọi thiết bị
+    \item Accessibility compliance
+    \item Comprehensive error handling và loading states
+\end{itemize}
+
+Hệ thống được thiết kế để dễ bảo trì, mở rộng và phù hợp với các best practices của React/TypeScript development.
+
+\end{document}
