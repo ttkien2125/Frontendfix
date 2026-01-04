@@ -1,0 +1,334 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{vietnam}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds, calc}
+\usepackage{geometry}
+\usepackage{xcolor}
+
+\geometry{a4paper, margin=1.5cm}
+
+% Define colors matching reference image
+\definecolor{yellowbox}{RGB}{254, 249, 195}
+\definecolor{lightred}{RGB}{254, 226, 226}
+
+% Define styles exactly like reference
+\tikzstyle{screen} = [rectangle, rounded corners=2pt, minimum width=3.2cm, minimum height=0.9cm, text centered, draw=red!70!black, fill=yellowbox, thick, text width=3cm, font=\small]
+\tikzstyle{mainscreen} = [rectangle, rounded corners=2pt, minimum width=4cm, minimum height=1cm, text centered, draw=red!70!black, fill=yellowbox, thick, text width=3.8cm]
+\tikzstyle{legend} = [rectangle, rounded corners=2pt, draw=red!80!black, thick, fill=lightred, text width=2.8cm, font=\small, align=left]
+\tikzstyle{arrow} = [thick,->,>=Stealth,draw=red!70!black]
+\tikzstyle{biarrow} = [thick,<->,>=Stealth,draw=red!70!black]
+
+\begin{document}
+
+\begin{figure}[p]
+\centering
+\begin{tikzpicture}[node distance=1.3cm, auto, scale=0.88, transform shape]
+
+% Top - Login Screen with fields
+\node[mainscreen] (login) at (7, 14) {Màn hình đăng nhập\\(LoginPage)};
+
+\node[screen] (username) at (3.5, 11.8) {Trường username};
+\node[screen] (password) at (7, 11.8) {Trường password};
+\node[screen] (login-btn) at (10.5, 11.8) {Nút đăng nhập};
+
+% Main Dashboard after login (for all roles)
+\node[mainscreen] (main-dashboard) at (7, 9.2) {Màn hình Dashboard\\theo vai trò};
+
+% Left side - Role-based navigation tabs
+\node[screen] (tab-overview) at (0.8, 8.5) {Tab Tổng quan};
+\node[screen] (tab-bills) at (0.8, 7) {Tab Hóa đơn};
+\node[screen] (tab-management) at (0.8, 5.5) {Tab Quản lý};
+
+% Right side - Role selection branches
+\node[screen] (role-resident) at (13.5, 10.5) {Vai trò\\Resident};
+\node[screen] (role-accountant) at (13.5, 9) {Vai trò\\Accountant};
+\node[screen] (role-manager) at (13.5, 7.5) {Vai trò\\Manager};
+\node[screen] (role-admin) at (13.5, 6) {Vai trò\\Admin};
+
+% Middle - Main function screens
+\node[screen] (overview-screen) at (3.5, 6) {Màn hình\\Tổng quan};
+\node[screen] (bills-screen) at (7, 6) {Màn hình\\Hóa đơn};
+\node[screen] (management-screen) at (10.5, 6) {Màn hình\\Quản lý};
+
+% Second level - Specific functions
+\node[screen] (resident-bills) at (4.5, 3.2) {Danh sách\\hóa đơn cư dân};
+\node[screen] (payment-qr) at (7.5, 3.2) {Tạo mã QR\\thanh toán};
+\node[screen] (accounting) at (10.5, 3.2) {Màn hình\\Kế toán};
+
+% Third level - Detailed screens
+\node[screen] (meter-reading) at (3.5, 0.5) {Nhập chỉ số\\công tơ};
+\node[screen] (service-fee) at (6.5, 0.5) {Thêm phí\\dịch vụ};
+\node[screen] (manual-bill) at (9.5, 0.5) {Tạo hóa đơn\\thủ công};
+\node[screen] (auto-bill) at (12.5, 0.5) {Tính hóa đơn\\tự động};
+
+% Bottom screens - Results
+\node[screen] (payment-result) at (6, -2.5) {Màn hình\\kết quả thanh toán};
+\node[screen] (bill-created) at (11, -2.5) {Hóa đơn\\được tạo};
+
+% Final screens
+\node[screen] (notification) at (6, -5) {Thông báo\\cho cư dân};
+\node[screen] (receipt) at (11, -5) {Biên lai\\thanh toán};
+
+% Legend box (bottom left)
+\node[legend] (legend) at (0.8, -3.5) {
+    \textbf{Chú thích:}\\
+    Resident\\
+    Accountant\\
+    Manager\\
+    Admin\\[0.2cm]
+    \textbf{Chức năng:}\\
+    Quản lý\\
+    Thanh toán\\
+    Thống kê
+};
+
+% Arrows from login to input fields
+\draw[arrow] (login) -- (username);
+\draw[arrow] (login) -- (password);
+\draw[arrow] (login) -- (login-btn);
+
+% Arrow from login to main dashboard (after authentication)
+\draw[arrow] (login) -- node[right] {$\blacktriangledown$} (main-dashboard);
+
+% Arrows from main dashboard to roles
+\draw[arrow] (main-dashboard) -- (role-resident);
+\draw[arrow] (main-dashboard) -- (role-accountant);
+\draw[arrow] (main-dashboard) -- (role-manager);
+\draw[arrow] (main-dashboard) -- (role-admin);
+
+% Arrows from navigation tabs to main dashboard
+\draw[arrow] (tab-overview) -- (main-dashboard);
+\draw[arrow] (tab-bills) -- (main-dashboard);
+\draw[arrow] (tab-management) -- (main-dashboard);
+
+% Bidirectional arrows from dashboard to main screens
+\draw[biarrow] (main-dashboard.south) to[out=250, in=90] (overview-screen.north);
+\draw[biarrow] (main-dashboard.south) to[out=270, in=90] (bills-screen.north);
+\draw[biarrow] (main-dashboard.south) to[out=290, in=90] (management-screen.north);
+
+% Arrows to second level
+\draw[arrow] (bills-screen) -- node[left] {$\blacktriangleleft$} (resident-bills);
+\draw[arrow] (bills-screen) -- node[right] {$\blacktriangleright$} (payment-qr);
+\draw[arrow] (management-screen) -- (accounting);
+
+% Arrows to third level (accounting functions)
+\draw[arrow] (accounting) -- (meter-reading);
+\draw[arrow] (accounting) -- (service-fee);
+\draw[arrow] (accounting) -- (manual-bill);
+\draw[arrow] (accounting) -- (auto-bill);
+
+% Arrows to results
+\draw[arrow] (payment-qr) -- (payment-result);
+\draw[arrow] (manual-bill) -- (bill-created);
+\draw[arrow] (auto-bill) -- (bill-created);
+
+% Arrows to final screens
+\draw[arrow] (payment-result) -- (notification);
+\draw[arrow] (bill-created) -- (receipt);
+
+% Additional decorative corners on main dashboard
+\draw[red!70!black, thick] ($(main-dashboard.south west) + (0.2, 0.1)$) -- ++(0, -0.3) -- ++(0.3, 0);
+\draw[red!70!black, thick] ($(main-dashboard.south east) + (-0.2, 0.1)$) -- ++(0, -0.3) -- ++(-0.3, 0);
+
+% Additional decorative corners on accounting screen
+\draw[red!70!black, thick] ($(accounting.south west) + (0.2, 0.1)$) -- ++(0, -0.3) -- ++(0.3, 0);
+\draw[red!70!black, thick] ($(accounting.south east) + (-0.2, 0.1)$) -- ++(0, -0.3) -- ++(-0.3, 0);
+
+% Additional decorative corners on payment result
+\draw[red!70!black, thick] ($(payment-result.south west) + (0.2, 0.1)$) -- ++(0, -0.3) -- ++(0.3, 0);
+\draw[red!70!black, thick] ($(payment-result.south east) + (-0.2, 0.1)$) -- ++(0, -0.3) -- ++(-0.3, 0);
+
+\end{tikzpicture}
+\caption{Sơ đồ luồng màn hình hệ thống quản lý tòa nhà BlueMoon}
+\label{fig:bluemoon-flow}
+\end{figure}
+
+\clearpage
+
+% Second diagram - Detailed Resident Flow
+\begin{figure}[p]
+\centering
+\begin{tikzpicture}[node distance=1.3cm, auto, scale=0.9, transform shape]
+
+% Title area
+\node[font=\Large\bfseries, text=red!70!black] at (7, 13) {Luồng hoạt động của Resident};
+
+% Main Resident Dashboard
+\node[mainscreen] (resident-dash) at (7, 10.5) {Resident Dashboard};
+
+% Navigation tabs
+\node[screen] (overview-tab) at (2, 9) {Tab\\Tổng quan};
+\node[screen] (bills-tab) at (5, 9) {Tab\\Hóa đơn};
+\node[screen] (payments-tab) at (8, 9) {Tab\\Thanh toán};
+\node[screen] (notif-tab) at (11, 9) {Tab\\Thông báo};
+
+% Overview screens
+\node[screen] (stats-card) at (2, 6.5) {Thẻ thống kê\\hóa đơn};
+
+% Bills screens
+\node[screen] (bill-list) at (5, 6.5) {Danh sách\\hóa đơn};
+\node[screen] (bill-filter) at (5, 4.5) {Bộ lọc\\trạng thái};
+\node[screen] (bill-select) at (5, 2.5) {Chọn nhiều\\hóa đơn};
+
+% Payment screens
+\node[screen] (payment-method) at (8, 6.5) {Chọn phương\\thức thanh toán};
+\node[screen] (qr-generate) at (8, 4.5) {Tạo mã QR\\VietQR};
+\node[screen] (payment-confirm) at (8, 2.5) {Xác nhận\\thanh toán};
+
+% Notification screens
+\node[screen] (notif-list) at (11, 6.5) {Danh sách\\thông báo};
+\node[screen] (notif-unread) at (11, 4.5) {Đếm chưa đọc};
+\node[screen] (notif-mark) at (11, 2.5) {Đánh dấu\\đã đọc};
+
+% Result screens
+\node[screen] (payment-success) at (6.5, 0) {Thanh toán\\thành công};
+\node[screen] (receipt-view) at (9.5, 0) {Xem biên lai};
+
+% Legend
+\node[legend] (legend2) at (1, 3) {
+    \textbf{Tính năng:}\\
+    • Xem hóa đơn\\
+    • Thanh toán\\
+    • Nhận thông báo\\
+    • Lọc \& tìm kiếm\\[0.2cm]
+    \textbf{Trạng thái:}\\
+    • Chưa thanh toán\\
+    • Đã thanh toán\\
+    • Quá hạn
+};
+
+% Arrows from dashboard to tabs
+\draw[biarrow] (resident-dash) -- (overview-tab);
+\draw[biarrow] (resident-dash) -- (bills-tab);
+\draw[biarrow] (resident-dash) -- (payments-tab);
+\draw[biarrow] (resident-dash) -- (notif-tab);
+
+% Arrows from tabs to screens
+\draw[arrow] (overview-tab) -- (stats-card);
+
+\draw[arrow] (bills-tab) -- (bill-list);
+\draw[arrow] (bill-list) -- (bill-filter);
+\draw[arrow] (bill-filter) -- (bill-select);
+
+\draw[arrow] (payments-tab) -- (payment-method);
+\draw[arrow] (payment-method) -- (qr-generate);
+\draw[arrow] (qr-generate) -- (payment-confirm);
+
+\draw[arrow] (notif-tab) -- (notif-list);
+\draw[arrow] (notif-list) -- (notif-unread);
+\draw[arrow] (notif-unread) -- (notif-mark);
+
+% Arrows to results
+\draw[arrow] (bill-select) to[out=270, in=150] (payment-success);
+\draw[arrow] (payment-confirm) -- (payment-success);
+\draw[arrow] (payment-success) -- (receipt-view);
+
+\end{tikzpicture}
+\caption{Sơ đồ chi tiết luồng hoạt động Resident}
+\label{fig:resident-flow}
+\end{figure}
+
+\clearpage
+
+% Third diagram - Accountant Flow
+\begin{figure}[p]
+\centering
+\begin{tikzpicture}[node distance=1.3cm, auto, scale=0.85, transform shape]
+
+% Title
+\node[font=\Large\bfseries, text=red!70!black] at (7, 13.5) {Luồng hoạt động của Accountant};
+
+% Main Accountant Dashboard
+\node[mainscreen] (acc-dash) at (7, 11.5) {Accountant Dashboard};
+
+% Main function cards
+\node[screen] (meter-card) at (3, 9) {Card:\\Nhập chỉ số\\công tơ};
+\node[screen] (fee-card) at (7, 9) {Card:\\Thêm phí\\dịch vụ};
+\node[screen] (manual-card) at (11, 9) {Card:\\Tạo hóa đơn\\thủ công};
+
+% Meter reading flow
+\node[screen] (meter-csv) at (1.5, 6.5) {Upload\\CSV};
+\node[screen] (meter-manual) at (4.5, 6.5) {Nhập\\thủ công};
+\node[screen] (meter-preview) at (3, 4.5) {Xem trước\\dữ liệu};
+\node[screen] (meter-submit) at (3, 2.5) {Gửi chỉ số\\công tơ};
+
+% Service fee flow
+\node[screen] (fee-type) at (7, 6.5) {Chọn loại\\hóa đơn};
+\node[screen] (fee-per-unit) at (5.5, 4.5) {Nhập đơn giá\\(Điện/Nước)};
+\node[screen] (fee-flat) at (8.5, 4.5) {Nhập phí\\cố định};
+\node[screen] (fee-submit) at (7, 2.5) {Lưu phí\\dịch vụ};
+
+% Manual bill flow
+\node[screen] (bill-apartment) at (11, 6.5) {Chọn\\căn hộ};
+\node[screen] (bill-type) at (11, 4.5) {Chọn loại\\hóa đơn};
+\node[screen] (bill-amount) at (11, 2.5) {Nhập\\số tiền};
+
+% Auto calculate section
+\node[mainscreen] (auto-calc) at (7, 0) {Tính hóa đơn tự động};
+\node[screen] (auto-month) at (3, -2.5) {Nhập tháng/năm};
+\node[screen] (auto-deadline) at (7, -2.5) {Chọn deadline};
+\node[screen] (auto-overwrite) at (11, -2.5) {Checkbox\\ghi đè};
+
+% Result
+\node[screen] (bills-created) at (7, -5) {Hóa đơn được tạo\\thành công};
+
+% Legend
+\node[legend] (legend3) at (14, 6) {
+    \textbf{4 chức năng:}\\
+    1. Nhập chỉ số\\
+    2. Thêm phí DV\\
+    3. Tạo thủ công\\
+    4. Tính tự động\\[0.2cm]
+    \textbf{Loại hóa đơn:}\\
+    • Điện\\
+    • Nước\\
+    • Quản lý\\
+    • Gửi xe\\
+    • Internet\\
+    • Khác
+};
+
+% Arrows from dashboard
+\draw[arrow] (acc-dash) -- (meter-card);
+\draw[arrow] (acc-dash) -- (fee-card);
+\draw[arrow] (acc-dash) -- (manual-card);
+
+% Meter reading arrows
+\draw[arrow] (meter-card) -- (meter-csv);
+\draw[arrow] (meter-card) -- (meter-manual);
+\draw[arrow] (meter-csv) -- (meter-preview);
+\draw[arrow] (meter-manual) -- (meter-preview);
+\draw[arrow] (meter-preview) -- (meter-submit);
+
+% Service fee arrows
+\draw[arrow] (fee-card) -- (fee-type);
+\draw[arrow] (fee-type) -- (fee-per-unit);
+\draw[arrow] (fee-type) -- (fee-flat);
+\draw[arrow] (fee-per-unit) -- (fee-submit);
+\draw[arrow] (fee-flat) -- (fee-submit);
+
+% Manual bill arrows
+\draw[arrow] (manual-card) -- (bill-apartment);
+\draw[arrow] (bill-apartment) -- (bill-type);
+\draw[arrow] (bill-type) -- (bill-amount);
+
+% Auto calculate arrows
+\draw[arrow] (acc-dash) to[out=270, in=90] (auto-calc);
+\draw[arrow] (auto-calc) -- (auto-month);
+\draw[arrow] (auto-calc) -- (auto-deadline);
+\draw[arrow] (auto-calc) -- (auto-overwrite);
+
+% To results
+\draw[arrow] (meter-submit) to[out=270, in=180] (bills-created);
+\draw[arrow] (fee-submit) to[out=270, in=150] (bills-created);
+\draw[arrow] (bill-amount) to[out=270, in=30] (bills-created);
+\draw[arrow] (auto-month) -- (bills-created);
+\draw[arrow] (auto-deadline) -- (bills-created);
+\draw[arrow] (auto-overwrite) -- (bills-created);
+
+\end{tikzpicture}
+\caption{Sơ đồ chi tiết luồng hoạt động Accountant}
+\label{fig:accountant-flow}
+\end{figure}
+
+\end{document}

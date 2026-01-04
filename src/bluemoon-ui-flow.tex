@@ -1,0 +1,121 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{vietnam}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds, calc}
+\usepackage{geometry}
+\usepackage{xcolor}
+
+\geometry{a4paper, margin=1cm}
+
+% Define colors matching reference image
+\definecolor{yellowbox}{RGB}{254, 249, 195}
+\definecolor{lightred}{RGB}{254, 226, 226}
+
+% Define styles exactly like reference
+\tikzstyle{screen} = [rectangle, rounded corners=2pt, minimum width=3.2cm, minimum height=0.9cm, text centered, draw=red!70!black, fill=yellowbox, thick, text width=3cm, font=\small]
+\tikzstyle{mainscreen} = [rectangle, rounded corners=2pt, minimum width=4cm, minimum height=1cm, text centered, draw=red!70!black, fill=yellowbox, thick, text width=3.8cm]
+\tikzstyle{legend} = [rectangle, rounded corners=2pt, draw=red!80!black, thick, fill=lightred, text width=2.8cm, font=\small, align=left]
+\tikzstyle{arrow} = [thick,->,>=Stealth,draw=red!70!black]
+\tikzstyle{biarrow} = [thick,<->,>=Stealth,draw=red!70!black]
+
+\begin{document}
+
+\begin{figure}[p]
+\centering
+\begin{tikzpicture}[node distance=1.3cm, auto, scale=0.95, transform shape]
+
+% Top - Login Screen with fields
+\node[mainscreen] (login) at (6, 13) {Màn hình đăng nhập};
+
+\node[screen] (username) at (3, 11) {Trường tên\\người dùng};
+\node[screen] (password) at (6, 11) {Phím mật khẩu};
+\node[screen] (role-select) at (9, 11) {Phím để tránh};
+\node[screen] (delete-key) at (11.5, 11) {Phím xóa};
+
+% Main Dashboard after login
+\node[mainscreen] (main-dashboard) at (6, 8.5) {Màn hình chính độc giả};
+
+% Left side - Navigation options
+\node[screen] (nav-search) at (0.5, 7.5) {Phím tìm kiếm};
+\node[screen] (nav-suggest) at (0.5, 6) {Phím gọi ý};
+\node[screen] (nav-exit) at (0.5, 4.5) {Phím thoát};
+
+% Middle - Main function screens
+\node[screen] (search-screen) at (3, 5) {Màn hình tìm kiếm\\dữ liệu};
+\node[screen] (suggest-screen) at (6.5, 5) {Màn hình gọi ý};
+
+% Result and order screens
+\node[screen] (result-screen) at (4.5, 2) {Màn hình kết quả};
+\node[screen] (order-screen) at (9.5, 2) {Màn hình đặt trước};
+
+% Bottom screens
+\node[screen] (booklist-screen) at (3, -1) {Màn hình danh sách\\sách};
+\node[screen] (order-button) at (6, -1) {Phím đặt trước};
+
+% Final detail screens
+\node[screen] (detail-window) at (4.5, -4) {Cửa sổ đặt trước};
+\node[screen] (recommend-button) at (8.5, -4) {Phím đề trình};
+
+% Legend box (bottom left)
+\node[legend] (legend) at (0.8, -2.5) {
+    \textbf{Chú thích:}\\
+    Tác giả\\
+    Loại\\
+    Tên tài liệu\\
+    Số tập chỉ\\
+    Chữa trường:\\
+    Chửa phim:\\
+    Để trình\\
+    Xóa
+};
+
+% Arrows from login to input fields
+\draw[arrow] (login) -- (username);
+\draw[arrow] (login) -- (password);
+\draw[arrow] (login) -- (role-select);
+\draw[arrow] (login) -- (delete-key);
+
+% Arrow from login to main dashboard (after authentication)
+\draw[arrow] (login) -- node[right] {$\blacktriangledown$} (main-dashboard);
+
+% Arrows from navigation to main dashboard
+\draw[arrow] (nav-search) -- (main-dashboard);
+\draw[arrow] (nav-suggest) -- (main-dashboard);
+\draw[arrow] (nav-exit) -- (main-dashboard);
+
+% Bidirectional arrows within main dashboard area
+\draw[biarrow] (main-dashboard.south) to[out=260, in=100] (search-screen.north);
+\draw[biarrow] (main-dashboard.south) to[out=280, in=100] (suggest-screen.north);
+
+% Arrows from search and suggest to result
+\draw[arrow] (search-screen) -- node[left] {$\blacktriangleleft$} (result-screen);
+\draw[arrow] (suggest-screen) -- node[right] {$\blacktriangleright$} (result-screen);
+
+% Arrow from result to order
+\draw[arrow] (result-screen) -- (order-screen);
+
+% Arrows from result to bottom screens
+\draw[arrow] (result-screen) -- (booklist-screen);
+\draw[arrow] (result-screen) -- (order-button);
+
+% Arrows to detail window
+\draw[arrow] (booklist-screen) -- node[left] {$\blacktriangleleft$} (detail-window);
+\draw[arrow] (order-button) -- node[right] {$\blacktriangleright$} (detail-window);
+
+% Arrow from order screen to recommend
+\draw[arrow] (order-screen) -- (recommend-button);
+
+% Additional decorative corners on main dashboard
+\draw[red!70!black, thick] ($(main-dashboard.south west) + (0.2, 0.1)$) -- ++(0, -0.3) -- ++(0.3, 0);
+\draw[red!70!black, thick] ($(main-dashboard.south east) + (-0.2, 0.1)$) -- ++(0, -0.3) -- ++(-0.3, 0);
+
+% Additional decorative corners on result screen
+\draw[red!70!black, thick] ($(result-screen.south west) + (0.2, 0.1)$) -- ++(0, -0.3) -- ++(0.3, 0);
+\draw[red!70!black, thick] ($(result-screen.south east) + (-0.2, 0.1)$) -- ++(0, -0.3) -- ++(-0.3, 0);
+
+\end{tikzpicture}
+\caption{Sơ đồ luồng màn hình hệ thống}
+\label{fig:ui-flow}
+\end{figure}
+
+\end{document}

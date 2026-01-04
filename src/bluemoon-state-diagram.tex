@@ -1,0 +1,160 @@
+\documentclass[12pt,a4paper,landscape]{article}
+\usepackage[utf8]{vietnam}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds, decorations.pathmorphing}
+\usepackage{geometry}
+\usepackage{xcolor}
+
+\geometry{a4paper, landscape, margin=1cm}
+
+% Define colors matching BlueMoon theme
+\definecolor{blueheader}{RGB}{37, 99, 235}
+\definecolor{bluelight}{RGB}{219, 234, 254}
+\definecolor{yellowbox}{RGB}{254, 249, 195}
+\definecolor{redbox}{RGB}{254, 226, 226}
+
+% Define styles
+\tikzstyle{screen} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm, text centered, draw=blueheader, fill=yellowbox, thick, text width=3cm]
+\tikzstyle{mainscreen} = [rectangle, rounded corners, minimum width=3.5cm, minimum height=1.2cm, text centered, draw=blueheader, fill=bluelight, thick, text width=3.5cm, font=\bfseries]
+\tikzstyle{role} = [rectangle, rounded corners, minimum width=2.5cm, minimum height=0.8cm, text centered, draw=blueheader, fill=yellowbox, thick]
+\tikzstyle{legend} = [rectangle, draw=red!80!black, thick, fill=redbox, text width=3cm, rounded corners]
+\tikzstyle{arrow} = [thick,->,>=Stealth,draw=red!70!black]
+\tikzstyle{biarrow} = [thick,<->,>=Stealth,draw=red!70!black]
+
+\begin{document}
+
+\begin{tikzpicture}[node distance=1.5cm, auto, scale=0.85, transform shape]
+
+% Legend
+\node[legend, text width=3.5cm] (legend) at (-8, 0) {
+    \textbf{Chú thích:}\\[0.2cm]
+    \small
+    • Resident\\
+    • Accountant\\
+    • Manager\\
+    • Admin\\[0.2cm]
+    \textbf{Màn hình:}\\
+    • Dashboard\\
+    • Quản lý\\
+    • Thống kê
+};
+
+% Login Screen (Top Center)
+\node[mainscreen] (login) at (0, 8) {Màn hình đăng nhập\\(LoginPage)};
+
+% Role Selection Layer
+\node[role] (resident) at (-6, 5.5) {Vai trò:\\Resident};
+\node[role] (accountant) at (-2, 5.5) {Vai trò:\\Accountant};
+\node[role] (manager) at (2, 5.5) {Vai trò:\\Manager};
+\node[role] (admin) at (6, 5.5) {Vai trò:\\Admin};
+
+% Main Dashboards
+\node[mainscreen] (resident-dash) at (-6, 3) {Resident\\Dashboard};
+\node[mainscreen] (accountant-dash) at (-2, 3) {Accountant\\Dashboard};
+\node[mainscreen] (manager-dash) at (2, 3) {Manager\\Dashboard};
+\node[mainscreen] (admin-dash) at (6, 3) {Admin\\Dashboard};
+
+% Resident Screens
+\node[screen] (res-overview) at (-8.5, 0.5) {Tổng quan\\(Overview)};
+\node[screen] (res-bills) at (-6.5, 0.5) {Hóa đơn\\(Bills)};
+\node[screen] (res-payments) at (-4.5, 0.5) {Thanh toán\\(Payments)};
+\node[screen] (res-notif) at (-6.5, -1.5) {Thông báo\\(Notifications)};
+
+% Accountant Screens
+\node[screen] (acc-overview) at (-3, 0.5) {Tổng quan\\(Overview)};
+\node[screen] (acc-accounting) at (-1, 0.5) {Kế toán\\(Accounting)};
+\node[screen] (acc-offline) at (-2, -1.5) {Thanh toán\\ngoại tuyến};
+
+% Manager Screens
+\node[screen] (mgr-overview) at (0.5, 0.5) {Tổng quan\\(Overview)};
+\node[screen] (mgr-residents) at (2.5, 0.5) {Quản lý\\cư dân};
+\node[screen] (mgr-apartments) at (4.5, 0.5) {Quản lý\\căn hộ};
+\node[screen] (mgr-notif) at (2.5, -1.5) {Gửi thông báo\\(Broadcast)};
+
+% Admin Screens (All Access)
+\node[screen] (adm-accounts) at (6, 0.5) {Quản lý\\tài khoản};
+\node[screen] (adm-managers) at (8, 0.5) {Quản lý\\Manager};
+\node[screen] (adm-accountants) at (10, 0.5) {Quản lý\\Accountant};
+\node[screen] (adm-buildings) at (7, -1.5) {Quản lý\\tòa nhà};
+\node[screen] (adm-receipts) at (9, -1.5) {Quản lý\\biên lai};
+
+% Accounting Sub-screens
+\node[screen, fill=bluelight, text width=2.5cm, minimum width=2.5cm] (acc-meter) at (-1, -3.5) {Nhập chỉ số\\công tơ};
+\node[screen, fill=bluelight, text width=2.5cm, minimum width=2.5cm] (acc-fee) at (1.5, -3.5) {Thêm phí\\dịch vụ};
+\node[screen, fill=bluelight, text width=2.5cm, minimum width=2.5cm] (acc-manual) at (-1, -5.5) {Tạo hóa đơn\\thủ công};
+\node[screen, fill=bluelight, text width=2.5cm, minimum width=2.5cm] (acc-auto) at (1.5, -5.5) {Tính hóa đơn\\tự động};
+
+% Bill Payment Flow
+\node[screen, fill=bluelight] (qr-payment) at (-4.5, -3.5) {Tạo mã QR\\thanh toán};
+
+% Arrows from Login to Roles
+\draw[arrow] (login) -- (resident);
+\draw[arrow] (login) -- (accountant);
+\draw[arrow] (login) -- (manager);
+\draw[arrow] (login) -- (admin);
+
+% Arrows from Roles to Dashboards
+\draw[arrow] (resident) -- (resident-dash);
+\draw[arrow] (accountant) -- (accountant-dash);
+\draw[arrow] (manager) -- (manager-dash);
+\draw[arrow] (admin) -- (admin-dash);
+
+% Resident Dashboard to Screens
+\draw[biarrow] (resident-dash) -- (res-overview);
+\draw[biarrow] (resident-dash) -- (res-bills);
+\draw[biarrow] (resident-dash) -- (res-payments);
+\draw[biarrow] (resident-dash) -- (res-notif);
+
+% Accountant Dashboard to Screens
+\draw[biarrow] (accountant-dash) -- (acc-overview);
+\draw[biarrow] (accountant-dash) -- (acc-accounting);
+\draw[biarrow] (accountant-dash) -- (acc-offline);
+
+% Manager Dashboard to Screens
+\draw[biarrow] (manager-dash) -- (mgr-overview);
+\draw[biarrow] (manager-dash) -- (mgr-residents);
+\draw[biarrow] (manager-dash) -- (mgr-apartments);
+\draw[biarrow] (manager-dash) -- (mgr-notif);
+
+% Admin Dashboard to Screens
+\draw[biarrow] (admin-dash) -- (adm-accounts);
+\draw[biarrow] (admin-dash) -- (adm-managers);
+\draw[biarrow] (admin-dash) -- (adm-accountants);
+\draw[biarrow] (admin-dash) -- (adm-buildings);
+\draw[biarrow] (admin-dash) -- (adm-receipts);
+
+% Accounting Sub-flows
+\draw[biarrow] (acc-accounting) -- (acc-meter);
+\draw[biarrow] (acc-accounting) -- (acc-fee);
+\draw[biarrow] (acc-accounting) -- (acc-manual);
+\draw[biarrow] (acc-accounting) -- (acc-auto);
+
+% Bill Payment Flow
+\draw[arrow] (res-bills) -- (qr-payment);
+
+% Admin has access to all features (shown with dashed lines)
+\draw[arrow, dashed, blue] (admin-dash.south) to[out=270, in=90] (acc-accounting.north);
+\draw[arrow, dashed, blue] (admin-dash.south) to[out=270, in=90] (mgr-residents.north);
+
+% Add grouping boxes
+\begin{pgfonlayer}{background}
+    % Resident area
+    \node[draw=blue!50, fill=blue!5, rounded corners, thick, fit=(res-overview) (res-bills) (res-payments) (res-notif), inner sep=0.3cm, opacity=0.3] {};
+    
+    % Accountant area
+    \node[draw=green!50, fill=green!5, rounded corners, thick, fit=(acc-overview) (acc-accounting) (acc-offline) (acc-meter) (acc-fee) (acc-manual) (acc-auto), inner sep=0.3cm, opacity=0.3] {};
+    
+    % Manager area
+    \node[draw=orange!50, fill=orange!5, rounded corners, thick, fit=(mgr-overview) (mgr-residents) (mgr-apartments) (mgr-notif), inner sep=0.3cm, opacity=0.3] {};
+    
+    % Admin area
+    \node[draw=red!50, fill=red!5, rounded corners, thick, fit=(adm-accounts) (adm-managers) (adm-accountants) (adm-buildings) (adm-receipts), inner sep=0.3cm, opacity=0.3] {};
+\end{pgfonlayer}
+
+% Title
+\node[font=\Large\bfseries, text=blueheader] at (0, 10) {Sơ đồ trạng thái hệ thống quản lý tòa nhà BlueMoon};
+\node[font=\normalsize, text=gray] at (0, 9.3) {State Diagram - Role-based Navigation Flow};
+
+\end{tikzpicture}
+
+\end{document}
