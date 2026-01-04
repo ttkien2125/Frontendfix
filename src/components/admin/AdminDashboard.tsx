@@ -10,6 +10,7 @@ import { OfflinePaymentsTab } from "./OfflinePaymentsTab";
 import { AccountingTab } from "./AccountingTab";
 import { ReceiptManagementTab } from "./ReceiptManagementTab";
 import { BuildingManagementTab } from "./BuildingManagementTab";
+import { ManagerNotificationTab } from "./ManagerNotificationTab";
 
 interface AdminDashboardProps {
   username: string;
@@ -48,6 +49,7 @@ export function AdminDashboard({ username, role, onLogout }: AdminDashboardProps
           {activeTab === "accounting" && <AccountingTab role={role} />}
           {activeTab === "receipts" && <ReceiptManagementTab role={role} />}
           {activeTab === "buildings" && <BuildingManagementTab role={role} />}
+          {activeTab === "notifications" && <ManagerNotificationTab role={role} />}
         </div>
       </div>
     </div>

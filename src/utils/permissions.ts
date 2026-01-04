@@ -68,4 +68,9 @@ export const Permissions = {
   canViewNotifications: (role: UserRole): boolean => {
     return role === "Resident";
   },
+
+  // Broadcast Notifications - Only Manager and Admin
+  canBroadcastNotifications: (role: UserRole): boolean => {
+    return role === "Manager" || role === "Admin";
+  },
 };
